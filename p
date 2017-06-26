@@ -3,7 +3,7 @@
 const pkg = require('./package.json');
 const program = require('commander');
 
-const jira = require('./jira.js');
+const tasks = require('./tasks.js');
 
 program
   .version(pkg.version);
@@ -12,14 +12,21 @@ program
   .command('open <issueNumber>')
   .description('Open issue in browser')
   .action(issueNumber => {
-    jira.openIssue(issueNumber);
+    tasks.openIssue(issueNumber);
   });
 
 program
   .command('new <issueTitle>')
   .description('Create new task')
   .action(issueTitle => {
-    jira.createIssue(issueTitle);
+    tasks.createIssue(issueTitle);
+  });
+
+program
+  .command('start <issueNumber>')
+  .description('Start working on an issue')
+  .action(issueNumber => {
+    tasks.start(issueNumber);
   });
 
 program.parse(process.argv);

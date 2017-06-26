@@ -24,45 +24,48 @@ exports.openIssue = issueNumber => {
   process.exit();
 };
 
-exports.createIssue = issueTitle => {
+exports.createIssue = async issueTitle => {
 
-  jira.getProject('SE', (err, project) => {
-    jira.findRapidView(project.name, ACTIVE_BOARD, (err, board) => {
-      jira.getLastSprintForRapidView(board.id, (err, activeSprint) => {
+  const projectKey = 'SE';
 
-        const issue = {
-          fields: {
-            project: {
-              id: PROJECT_SE
-            },
-            summary: issueTitle,
-            issuetype: {
-              id: ISSUE_TYPE_TASK
-            },
-            assignee: {
-              name: ME
-            },
-            priority: {
-              id: PRIORITY_MEDIUM
-            },
-            components: [{
-              id: COMPONENT_HQ_FRONTEND
-            }],
-            [SPRINT_CUSTOM_FIELD_ID]: activeSprint.id,
-          }
-        };
+  console.log(`Get project information code "${projectKey}"`);
+  const project = await jira.getProject(projectKey);
 
-        console.log('Creating issue: ', issue);
+  console.log(`Get board information of project "${project.name}"`);
+  const board = await jira.findRapidView(project.name, ACTIVE_BOARD);
 
-        jira.addNewIssue(issue, (err, issue) => {
-          if (err) {
-            console.error(err);
-            return;
-          }
-          console.log('Issue created: ', issue.key);
-        });
-      });
-    });
-  });
+  console.log(`Get active sprint of board "${board.name}"`);
+  const activeSprint = await jira.getLastSprintForRapidView(board.id);
+
+  const issueFields = {
+    fields: {
+      project: {
+        id: PROJECT_SE
+      },
+      summary: issueTitle,
+      issuetype: {
+        id: ISSUE_TYPE_TASK
+      },
+      assignee: {
+        name: ME
+      },
+      priority: {
+        id: PRIORITY_MEDIUM
+      },
+      components: [{
+        id: COMPONENT_HQ_FRONTEND
+      }],
+      [SPRINT_CUSTOM_FIELD_ID]: activeSprint.id,
+    }
+  };
+
+  console.log(`Creating issue in ${activeSprint.name}: `, issueFields);
+  const issue = await jira.addNewIssue(issueFields);
+
+  console.log('Issue created: ', issue.key);
+  return issue;
 };
 
+exports.findIssue = issueNumber => {
+  return jira.findIssue('SE-' + issueNumber.replace(/^SE-/, ''));
+};

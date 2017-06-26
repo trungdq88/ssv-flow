@@ -5,15 +5,21 @@
   "author": "Trung Dinh Quang <trungdq88@gmail.com>",
   "dependencies": {
     "commander": "^2.10.0",
-    "nodegit": "^0.18.3",
+    "inquirer": "^3.1.1",
     "oauth": "^0.9.15",
     "opn": "^5.1.0",
+    "promise": "^8.0.0",
+    "simple-git": "^1.73.0",
     "url": "^0.11.0"
   },
   "devDependencies": {
+    "eslint": "^4.1.1",
     "jest": "^20.0.4"
   },
   "scripts": {
     "test": "jest --watchAll"
+  },
+  "engines": {
+    "node": ">=4.0.0"
   }
 }
