@@ -161,3 +161,30 @@ exports.getCurrentBranchName = () => {
       });
   });
 };
+
+exports.merge = (from, to) => {
+  return new Promise((resolve, reject) => {
+    SimpleGit(pathToRepo)
+      .mergeFromTo(from, to, (err, success) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        resolve(success);
+      });
+  });
+};
+
+exports.getLatestTag = () => {
+  return new Promise((resolve, reject) => {
+    SimpleGit(pathToRepo)
+      .tags((err, tags) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        console.log(tags.latest);
+        resolve(tags.latest);
+      });
+  });
+};

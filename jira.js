@@ -1,4 +1,4 @@
-const JiraApi = require('./lib/jira.js').JiraApi;
+const JiraApi = require('./lib/jira-api.js').JiraApi;
 const config = require('./config.js');
 const opn = require('opn');
 
@@ -10,16 +10,17 @@ const {
   SPRINT_CUSTOM_FIELD_ID,
   ACTIVE_BOARD,
   COMPONENT_HQ_FRONTEND,
+  ISSUE_TRANSITIONS,
 } = config;
 
-const jira = new JiraApi(
+const jiraApi = new JiraApi(
   config.protocol, config.host, config.port, config.user, config.password, 'latest'
 );
 
-exports.openIssue = issueNumber => {
+exports.openIssue = issueKey => {
   opn(
     config.protocol + '://' + config.host +
-    '/browse/SE-' + issueNumber.replace(/^SE-/, '')
+    '/browse/SE-' + issueKey.replace(/^SE-/, '')
   );
   process.exit();
 };
@@ -29,13 +30,13 @@ exports.createIssue = async issueTitle => {
   const projectKey = 'SE';
 
   console.log(`Get project information code "${projectKey}"`);
-  const project = await jira.getProject(projectKey);
+  const project = await jiraApi.getProject(projectKey);
 
   console.log(`Get board information of project "${project.name}"`);
-  const board = await jira.findRapidView(project.name, ACTIVE_BOARD);
+  const board = await jiraApi.findRapidView(project.name, ACTIVE_BOARD);
 
   console.log(`Get active sprint of board "${board.name}"`);
-  const activeSprint = await jira.getLastSprintForRapidView(board.id);
+  const activeSprint = await jiraApi.getLastSprintForRapidView(board.id);
 
   const issueFields = {
     fields: {
@@ -60,12 +61,45 @@ exports.createIssue = async issueTitle => {
   };
 
   console.log(`Creating issue in ${activeSprint.name}: `, issueFields);
-  const issue = await jira.addNewIssue(issueFields);
+  const issue = await jiraApi.addNewIssue(issueFields);
 
   console.log('Issue created: ', issue.key);
   return issue;
 };
 
-exports.findIssue = issueNumber => {
-  return jira.findIssue('SE-' + issueNumber.replace(/^SE-/, ''));
+exports.findIssue = issueKey => {
+  return jiraApi.findIssue('SE-' + issueKey.replace(/^SE-/, ''));
+};
+
+exports.assignIssue = async (issueKey, username) => {
+  for (let i = 0; i < ISSUE_TRANSITIONS.length; i++) {
+    const transitionName = ISSUE_TRANSITIONS[i];
+    const availableTransitions = (
+      await jiraApi.listTransitions(issueKey)
+    ).transitions;
+    const nextTransition = availableTransitions.find(
+      transition => transition.name.toLowerCase() ===
+      transitionName.toLowerCase()
+    );
+
+    if (!nextTransition) {
+      throw new Error(
+        `Transition "${transitionName}" not found in available` +
+        ` transitions of issue ${issueKey}:\n` +
+        `${availableTransitions.map(_ => _.name).join('\n')}`
+      );
+    }
+
+    console.log(`Moving ${issueKey} to ${nextTransition.name}...`);
+    await jiraApi.transitionIssue(issueKey, {
+      transition: nextTransition
+    });
+  }
+
+  console.log(`Issue transition complete.`);
+  return true;
+};
+
+exports.addComment = (issueKey, comment) => {
+  return jiraApi.addComment(issueKey, comment);
 };

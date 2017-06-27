@@ -36,4 +36,11 @@ program
     tasks.commit(commitMessage);
   });
 
+program
+  .command('done <username>')
+  .description('Complete an issue')
+  .action(user => {
+    tasks.done(user);
+  });
+
 program.parse(process.argv);

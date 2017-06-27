@@ -1,23 +1,22 @@
 const jira = require('./jira.js');
 const git = require('./git.js');
 const input = require('./input.js');
+const cmd = require('./cmd.js');
 const slug = require('./utils/slug.js').default;
 
 const REMOTE_NAME = 'all';
 
 exports.openIssue = (...args) => jira.openIssue(...args);
 
-exports.start = async (issueNumber) => {
+exports.start = async (issueKey) => {
   // Check repo clean
-  const isClean = await git.isRepoClean();
-
-  if (!isClean) {
+  if (!await git.isRepoClean()) {
     console.error('Repo is not clean!');
     return;
   }
 
-  console.log(`Get issue ${issueNumber} info`);
-  const issue = await jira.findIssue(issueNumber);
+  console.log(`Get issue ${issueKey} info`);
+  const issue = await jira.findIssue(issueKey);
   const branchName = issue.key + '/' + slug(issue.fields.summary);
 
   if (!(await git.isBranchLocalExists(branchName))) {
@@ -85,7 +84,7 @@ exports.commit = async fastCommitMessage => {
   async function commit(fastCommitMessage) {
     let userMessage = fastCommitMessage;
     const branchName = await git.getCurrentBranchName();
-    const issueNumber = branchName.split('/')[0];
+    const issueKey = branchName.split('/')[0];
 
     if (!userMessage) {
       userMessage = await input.enter();
@@ -93,12 +92,12 @@ exports.commit = async fastCommitMessage => {
 
     if (!userMessage) {
       console.log('Fetching issue title as commit message...');
-      const issue = await jira.findIssue(issueNumber);
+      const issue = await jira.findIssue(issueKey);
       userMessage = `${issue.fields.summary}`;
     }
 
     const commitTag = await git.getCommitTag()
-    const commitMessage = `${commitTag} [${issueNumber}] ${userMessage}`;
+    const commitMessage = `${commitTag} [${issueKey}] ${userMessage}`;
 
     console.log('Committing:', commitMessage);
     git.commit(commitMessage);
@@ -129,4 +128,41 @@ exports.commit = async fastCommitMessage => {
   }
 
   console.log('Awesome!');
+};
+
+exports.done = async username => {
+  const currentBranchName = await git.getCurrentBranchName();
+  const issueKey = currentBranchName.split('/')[0];
+  if (currentBranchName === 'master') {
+    console.log('You are not suppose to run this command on master');
+    return;
+  }
+
+  if (!await git.isRepoClean()) {
+    console.error('Repo is not clean!');
+    return;
+  }
+
+  await git.merge('master', currentBranchName);
+
+  if (!await git.isRepoClean()) {
+    console.error('There is conflict after merge, please fix it!');
+    return;
+  }
+
+  await cmd.runTests();
+
+  await git.checkOut('master');
+
+  await git.merge(currentBranchName, 'master');
+
+  await cmd.deploy();
+
+  await jira.assignIssue(issueKey, username);
+
+  const latestTag = await git.getLatestTag();
+
+  await jira.addComment(issueKey, `Done at ${latestTag}.`);
+
+  console.log('Done');
 };

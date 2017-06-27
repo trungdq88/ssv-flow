@@ -19,7 +19,8 @@
     "jest": "^20.0.4"
   },
   "scripts": {
-    "test": "jest --watchAll"
+    "test": "jest",
+    "deploy": "echo \"Fake deploy\""
   },
   "engines": {
     "node": ">=4.0.0"

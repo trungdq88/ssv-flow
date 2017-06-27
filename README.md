@@ -32,6 +32,7 @@
   - Bump version
   - Push all branches & tags to all remotes
   - Assign issue to username
+  - Comment version number
 
 ### `p open (:issueNumber)`
 
