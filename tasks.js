@@ -165,5 +165,7 @@ exports.done = async username => {
 
   await jira.addComment(issueKey, `Done at ${latestTag}.`);
 
+  await jira.assignIssue(issueKey, username);
+
   console.log('Done');
 };

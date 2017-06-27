@@ -31,8 +31,9 @@
   - Merge back from branch
   - Bump version
   - Push all branches & tags to all remotes
-  - Assign issue to username
+  - Move issue
   - Comment version number
+  - Assign issue to username
 
 ### `p open (:issueNumber)`
 

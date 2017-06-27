@@ -103,3 +103,7 @@ exports.assignIssue = async (issueKey, username) => {
 exports.addComment = (issueKey, comment) => {
   return jiraApi.addComment(issueKey, comment);
 };
+
+exports.assignIssue = (issueKey, username) => {
+  return jiraApi.assignIssue(issueKey, username);
+};
