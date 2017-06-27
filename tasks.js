@@ -49,12 +49,18 @@ exports.createIssue = async (issueTitle) => {
   }
 };
 
-exports.commit = async commitMessage => {
+exports.commit = async fastCommitMessage => {
 
   const isClean = await git.isRepoClean();
 
   if (isClean) {
     console.error('Repo is clean, there is nothing to commit!');
+    return;
+  }
+
+  if (fastCommitMessage) {
+    await addAll();
+    await commit(fastCommitMessage);
     return;
   }
 
@@ -76,10 +82,14 @@ exports.commit = async commitMessage => {
     await git.addAll();
   }
 
-  async function commit() {
-    let userMessage = await input.enter();
+  async function commit(fastCommitMessage) {
+    let userMessage = fastCommitMessage;
     const branchName = await git.getCurrentBranchName();
     const issueNumber = branchName.split('/')[0];
+
+    if (!userMessage) {
+      userMessage = await input.enter();
+    }
 
     if (!userMessage) {
       console.log('Fetching issue title as commit message...');
@@ -95,7 +105,7 @@ exports.commit = async commitMessage => {
   }
 
   function cancel() {
-    console.log('cancel');
+    console.log('Cancelled');
   }
 
   const choice = await input.choice('Please select an action', [
