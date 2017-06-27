@@ -29,4 +29,11 @@ program
     tasks.start(issueNumber);
   });
 
+program
+  .command('commit [commitMessage]')
+  .description('Commit current changes')
+  .action(commitMessage => {
+    tasks.commit(commitMessage);
+  });
+
 program.parse(process.argv);
