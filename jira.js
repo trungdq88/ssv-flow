@@ -60,7 +60,7 @@ exports.createIssue = async issueTitle => {
     }
   };
 
-  console.log(`Creating issue in ${activeSprint.name}: `, issueFields);
+  console.log(`Creating issue in ${activeSprint.name}...`);
   const issue = await jiraApi.addNewIssue(issueFields);
 
   console.log('Issue created: ', issue.key);

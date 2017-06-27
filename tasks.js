@@ -1,10 +1,11 @@
+const config = require('./config.js');
 const jira = require('./jira.js');
 const git = require('./git.js');
 const input = require('./input.js');
 const cmd = require('./cmd.js');
 const slug = require('./utils/slug.js').default;
 
-const REMOTE_NAME = 'all';
+const { REMOTE_NAME } = config;
 
 exports.openIssue = (...args) => jira.openIssue(...args);
 
