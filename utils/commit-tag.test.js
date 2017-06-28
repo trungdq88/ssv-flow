@@ -67,6 +67,12 @@ describe('commit-tag.js', () => {
     ])).toBe('[SHARED/HQ]');
   });
 
+  it('LEGACY', () => {
+    expect(commitTag([
+      'src/js/business/entity-info.js',
+    ])).toBe('[LEGACY]');
+  });
+
   it('CONFIG', () => {
     expect(commitTag([
       'src/portals/aoeu',

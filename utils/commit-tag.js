@@ -25,6 +25,10 @@ exports.default = (statusFilePaths) => {
     tags.push('ANA');
   }
 
+  if (statusFilePaths.some(_ => /^src\/js\//.test(_))) {
+    tags.push('LEGACY');
+  }
+
   if (statusFilePaths.length > 0 && tags.length === 0) {
     tags.push('CONFIG');
   }
