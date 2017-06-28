@@ -3,7 +3,7 @@ const jira = require('./jira.js');
 const git = require('./git.js');
 const input = require('./input.js');
 const cmd = require('./cmd.js');
-const slug = require('./utils/slug.js').default;
+const slug = require('./utils/slug.js');
 
 const { REMOTE_NAME } = config;
 

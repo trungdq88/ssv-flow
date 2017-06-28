@@ -1,15 +1,15 @@
 exports.runTests = () => {
   return new Promise((resolve, reject) => {
     const spawn = require('child_process').spawn;
-    var env = Object.create( process.env );
+    var env = Object.create(process.env);
     env.CI = 'true';
-    const gitDiff = spawn('yarn', ['test'], {
+    const p = spawn('yarn', ['test'], {
       stdio: 'inherit',
       env,
     });
-    gitDiff.on('exit', (code) => {
+    p.on('exit', (code) => {
       if (code === 0) {
-        resolve();
+        resolve(code);
       } else {
         reject(code);
       }
@@ -20,15 +20,15 @@ exports.runTests = () => {
 exports.deploy = () => {
   return new Promise((resolve, reject) => {
     const spawn = require('child_process').spawn;
-    var env = Object.create( process.env );
+    var env = Object.create(process.env);
     env.CI = 'true';
-    const gitDiff = spawn('yarn', ['run', 'deploy'], {
+    const p = spawn('yarn', ['run', 'deploy'], {
       stdio: 'inherit',
       env,
     });
-    gitDiff.on('exit', (code) => {
+    p.on('exit', (code) => {
       if (code === 0) {
-        resolve();
+        resolve(0);
       } else {
         reject(code);
       }

@@ -1,4 +1,4 @@
-exports.default = text => (
+module.exports = text => (
   text
   .toLowerCase()
   .replace(/[^a-z0-9]/g, '-')

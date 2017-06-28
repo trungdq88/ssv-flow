@@ -1,5 +1,7 @@
-exports.default = (statusFilePaths) => {
+module.exports = (statusFilePaths) => {
   const tags = [];
+
+  if (statusFilePaths.length === 0) return '';
 
   if (statusFilePaths.some(_ => /^src\/portals\/_shared/.test(_))) {
     tags.push('SHARED');

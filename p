@@ -3,7 +3,7 @@
 const pkg = require('./package.json');
 const program = require('commander');
 
-const tasks = require('./tasks.js');
+const tasks = require('./src/tasks.js');
 
 program
   .version(pkg.version);

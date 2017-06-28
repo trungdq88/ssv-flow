@@ -1,4 +1,4 @@
-const branchName = require('./slug.js').default;
+const branchName = require('./slug.js');
 
 describe('branch-name.js', () => {
   it('should works', () => {

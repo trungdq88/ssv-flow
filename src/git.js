@@ -1,10 +1,9 @@
-const Promise = require('promise');
 const path = require('path');
 const SimpleGit = require('simple-git');
 require('colors');
 
 const config = require('./config.js');
-const commitTag = require('./utils/commit-tag.js').default;
+const commitTag = require('./utils/commit-tag.js');
 
 const pathToRepo = path.resolve(config.REPO_PATH);
 
@@ -31,19 +30,6 @@ exports.isRepoClean = () => {
           return;
         }
         resolve(status.files.length === 0);
-      });
-  });
-};
-
-exports.checkOut = branchName => {
-  return new Promise((resolve, reject) => {
-    SimpleGit(pathToRepo)
-      .checkout(branchName, (err, success) => {
-        if (err) {
-          reject(err);
-          return;
-        }
-        resolve(success);
       });
   });
 };
@@ -183,7 +169,6 @@ exports.getLatestTag = () => {
           reject(err);
           return;
         }
-        console.log(tags.latest);
         resolve(tags.latest);
       });
   });

@@ -1,4 +1,4 @@
-const commitTag = require('./commit-tag.js').default;
+const commitTag = require('./commit-tag.js');
 
 describe('commit-tag.js', () => {
 
@@ -78,6 +78,10 @@ describe('commit-tag.js', () => {
       'src/portals/aoeu',
       'src/portals/index.js',
     ])).toBe('[CONFIG]');
+  });
+
+  it('Empty', () => {
+    expect(commitTag([])).toBe('');
   });
 
 });
