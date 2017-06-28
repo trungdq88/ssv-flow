@@ -175,6 +175,16 @@ describe('git.js', () => {
     return expect(p).resolves.toBe(false);
   });
 
+  it('getStatusPrint error', () => {
+    const mockSimpleGit = require('simple-git')
+      .mockImplementation(() => ({
+        status: callback => callback('error'),
+      }));
+    const p = git.getStatusPrint();
+    expect(mockSimpleGit).toBeCalledWith('/DUMMY');
+    return expect(p).rejects.toBe('error');
+  });
+
   it('getStatusPrint', () => {
     const dummyFiles = [
       { path: '123', working_dir: '1', index: '2' },
