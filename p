@@ -44,3 +44,5 @@ program
   });
 
 program.parse(process.argv);
+
+program.help();
