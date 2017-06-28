@@ -20,7 +20,7 @@
   },
   "scripts": {
     "test": "jest",
-    "deploy": "npm run version && gp && gp --tags"
+    "deploy": "npm version patch && gp && gp --tags"
   },
   "engines": {
     "node": ">=4.0.0"
