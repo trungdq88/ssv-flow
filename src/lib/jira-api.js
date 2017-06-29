@@ -1,9 +1,10 @@
-var url = require('url');
-var logger = console;
-var OAuth = require('oauth');
-var Promise = require('promise');
+const url = require('url');
+const OAuth = require('oauth');
+const Promise = require('promise');
 
-var JiraApi = (exports.JiraApi = function(
+let logger = console;
+
+const JiraApi = (exports.JiraApi = function(
   protocol,
   host,
   port,

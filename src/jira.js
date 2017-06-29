@@ -1,3 +1,4 @@
+// @format
 const JiraApi = require('./lib/jira-api.js').JiraApi;
 const config = require('./config.js');
 const opn = require('opn');
@@ -11,6 +12,7 @@ const {
   ACTIVE_BOARD,
   COMPONENT_HQ_FRONTEND,
   ISSUE_TRANSITIONS,
+  PROJECT_CODE,
 } = config;
 
 const jiraApi = new JiraApi(
@@ -27,17 +29,16 @@ exports.openIssue = issueKey => {
     config.protocol +
       '://' +
       config.host +
-      '/browse/SE-' +
-      issueKey.replace(/^SE-/, ''),
+      '/browse/' +
+      PROJECT_CODE +
+      '-' +
+      issueKey.replace(new RegExp('^' + PROJECT_CODE + '-'), ''),
   );
-  process.exit();
 };
 
 exports.createIssue = async issueTitle => {
-  const projectKey = 'SE';
-
-  console.log(`Get project information code "${projectKey}"`);
-  const project = await jiraApi.getProject(projectKey);
+  console.log(`Get project information code "${PROJECT_CODE}"`);
+  const project = await jiraApi.getProject(PROJECT_CODE);
 
   console.log(`Get board information of project "${project.name}"`);
   const board = await jiraApi.findRapidView(project.name, ACTIVE_BOARD);
@@ -77,10 +78,14 @@ exports.createIssue = async issueTitle => {
 };
 
 exports.findIssue = issueKey => {
-  return jiraApi.findIssue('SE-' + issueKey.replace(/^SE-/, ''));
+  return jiraApi.findIssue(
+    PROJECT_CODE +
+      '-' +
+      issueKey.replace(new RegExp('^' + PROJECT_CODE + '-'), ''),
+  );
 };
 
-exports.assignIssue = async (issueKey, username) => {
+exports.moveIssue = async (issueKey, username) => {
   for (let i = 0; i < ISSUE_TRANSITIONS.length; i++) {
     const transitionName = ISSUE_TRANSITIONS[i];
     const availableTransitions = (await jiraApi.listTransitions(issueKey))
