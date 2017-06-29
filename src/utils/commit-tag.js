@@ -1,4 +1,4 @@
-module.exports = (statusFilePaths) => {
+module.exports = statusFilePaths => {
   const tags = [];
 
   if (statusFilePaths.length === 0) return '';

@@ -3,9 +3,16 @@ var logger = console;
 var OAuth = require('oauth');
 var Promise = require('promise');
 
-var JiraApi = exports.JiraApi = function(
-  protocol, host, port, username, password,
-  apiVersion, verbose, strictSSL, oauth
+var JiraApi = (exports.JiraApi = function(
+  protocol,
+  host,
+  port,
+  username,
+  password,
+  apiVersion,
+  verbose,
+  strictSSL,
+  oauth,
 ) {
   this.protocol = protocol;
   this.host = host;
@@ -21,7 +28,9 @@ var JiraApi = exports.JiraApi = function(
   this.strictSSL = strictSSL;
   // This is so we can fake during unit tests
   this.request = require('request');
-  if (verbose !== true) { logger = { log: function() {} }; }
+  if (verbose !== true) {
+    logger = {log: function() {}};
+  }
 
   // This is the same almost every time, refactored to make changing it
   // later, easier
@@ -40,29 +49,28 @@ var JiraApi = exports.JiraApi = function(
       protocol: this.protocol,
       hostname: this.host,
       port: this.port,
-      pathname: basePath + apiVersion + pathname
+      pathname: basePath + apiVersion + pathname,
     });
     return decodeURIComponent(uri);
   };
 
   this.doRequest = function(options, callback) {
-    if(oauth && oauth.consumer_key && oauth.consumer_secret) {
+    if (oauth && oauth.consumer_key && oauth.consumer_secret) {
       options.oauth = {
         consumer_key: oauth.consumer_key,
         consumer_secret: oauth.consumer_secret,
         token: oauth.access_token,
-        token_secret: oauth.access_token_secret
+        token_secret: oauth.access_token_secret,
       };
     } else {
       options.auth = {
-        'user': this.username,
-        'pass': this.password
+        user: this.username,
+        pass: this.password,
       };
     }
     this.request(options, callback);
   };
-
-};
+});
 
 (function() {
   // ## Find an issue in jira ##
@@ -78,17 +86,14 @@ var JiraApi = exports.JiraApi = function(
   //
   // [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290709)
   this.findIssue = function(issueNumber, callback) {
-
     var options = {
       rejectUnauthorized: this.strictSSL,
       uri: this.makeUri('/issue/' + issueNumber),
-      method: 'GET'
+      method: 'GET',
     };
 
     return new Promise((resolve, reject) => {
-
       this.doRequest(options, function(error, response, body) {
-
         if (error) {
           reject(error);
           return;
@@ -100,7 +105,10 @@ var JiraApi = exports.JiraApi = function(
         }
 
         if (response.statusCode !== 200) {
-          reject(response.statusCode + ': Unable to connect to JIRA during findIssueStatus.');
+          reject(
+            response.statusCode +
+              ': Unable to connect to JIRA during findIssueStatus.',
+          );
           return;
         }
 
@@ -110,7 +118,6 @@ var JiraApi = exports.JiraApi = function(
         }
 
         resolve(JSON.parse(body));
-
       });
     });
   };
@@ -130,11 +137,10 @@ var JiraApi = exports.JiraApi = function(
     var options = {
       rejectUnauthorized: this.strictSSL,
       uri: this.makeUri('/version/' + version + '/unresolvedIssueCount'),
-      method: 'GET'
+      method: 'GET',
     };
 
     this.doRequest(options, function(error, response, body) {
-
       if (error) {
         callback(error, null);
         return;
@@ -146,13 +152,15 @@ var JiraApi = exports.JiraApi = function(
       }
 
       if (response.statusCode !== 200) {
-        callback(response.statusCode + ': Unable to connect to JIRA during findIssueStatus.');
+        callback(
+          response.statusCode +
+            ': Unable to connect to JIRA during findIssueStatus.',
+        );
         return;
       }
 
       body = JSON.parse(body);
       callback(null, body.issuesUnresolvedCount);
-
     });
   };
 
@@ -168,17 +176,14 @@ var JiraApi = exports.JiraApi = function(
   //
   // [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id289232)
   this.getProject = function(project, callback) {
-
     return new Promise((resolve, reject) => {
-
       var options = {
         rejectUnauthorized: this.strictSSL,
         uri: this.makeUri('/project/' + project),
-        method: 'GET'
+        method: 'GET',
       };
 
       this.doRequest(options, function(error, response, body) {
-
         if (error) {
           reject(error);
           return;
@@ -190,31 +195,29 @@ var JiraApi = exports.JiraApi = function(
         }
 
         if (response.statusCode !== 200) {
-          reject(response.statusCode + ': Unable to connect to JIRA during getProject.');
+          reject(
+            response.statusCode +
+              ': Unable to connect to JIRA during getProject.',
+          );
           return;
         }
 
         body = JSON.parse(body);
         resolve(body);
-
       });
-
     });
   };
 
   this.findRapidView = function(projectName, boardName, callback) {
-
     var options = {
       rejectUnauthorized: this.strictSSL,
       uri: this.makeUri('/rapidviews/list', 'rest/greenhopper/'),
       method: 'GET',
-      json: true
+      json: true,
     };
 
     return new Promise((resolve, reject) => {
-
       this.doRequest(options, function(error, response) {
-
         if (error) {
           reject(error);
           return;
@@ -226,20 +229,22 @@ var JiraApi = exports.JiraApi = function(
         }
 
         if (response.statusCode !== 200) {
-          reject(response.statusCode + ': Unable to connect to JIRA during rapidView search.');
+          reject(
+            response.statusCode +
+              ': Unable to connect to JIRA during rapidView search.',
+          );
           return;
         }
 
         if (response.body !== null) {
           var rapidViews = response.body.views;
           for (var i = 0; i < rapidViews.length; i++) {
-            if(rapidViews[i].name.toLowerCase() === boardName.toLowerCase()) {
+            if (rapidViews[i].name.toLowerCase() === boardName.toLowerCase()) {
               resolve(rapidViews[i]);
               return;
             }
           }
         }
-
       });
     });
   };
@@ -261,17 +266,15 @@ var JiraApi = exports.JiraApi = function(
    * @param callback
    */
   this.getLastSprintForRapidView = function(rapidViewId, callback) {
-
     var options = {
       rejectUnauthorized: this.strictSSL,
       uri: this.makeUri('/sprintquery/' + rapidViewId, 'rest/greenhopper/'),
       method: 'GET',
-      json:true
+      json: true,
     };
 
     return new Promise((resolve, reject) => {
       this.doRequest(options, function(error, response) {
-
         if (error) {
           reject(error);
           return;
@@ -283,7 +286,10 @@ var JiraApi = exports.JiraApi = function(
         }
 
         if (response.statusCode !== 200) {
-          reject(response.statusCode + ': Unable to connect to JIRA during sprints search.');
+          reject(
+            response.statusCode +
+              ': Unable to connect to JIRA during sprints search.',
+          );
           return;
         }
 
@@ -292,7 +298,6 @@ var JiraApi = exports.JiraApi = function(
           resolve(sprints.pop());
           return;
         }
-
       });
     });
   };
@@ -315,40 +320,49 @@ var JiraApi = exports.JiraApi = function(
    * @param sprintId
    * @param callback
    */
-  this.getSprintIssues = function getSprintIssues(rapidViewId, sprintId, callback) {
-
+  this.getSprintIssues = function getSprintIssues(
+    rapidViewId,
+    sprintId,
+    callback,
+  ) {
     var options = {
       rejectUnauthorized: this.strictSSL,
-      uri: this.makeUri('/rapid/charts/sprintreport?rapidViewId=' + rapidViewId + '&sprintId=' + sprintId, 'rest/greenhopper/'),
+      uri: this.makeUri(
+        '/rapid/charts/sprintreport?rapidViewId=' +
+          rapidViewId +
+          '&sprintId=' +
+          sprintId,
+        'rest/greenhopper/',
+      ),
       method: 'GET',
-      json: true
+      json: true,
     };
 
     this.doRequest(options, function(error, response) {
-
       if (error) {
         callback(error, null);
         return;
       }
 
-      if( response.statusCode === 404 ) {
+      if (response.statusCode === 404) {
         callback('Invalid URL');
         return;
       }
 
-      if( response.statusCode !== 200 ) {
-        callback(response.statusCode + ': Unable to connect to JIRA during sprints search');
+      if (response.statusCode !== 200) {
+        callback(
+          response.statusCode +
+            ': Unable to connect to JIRA during sprints search',
+        );
         return;
       }
 
-      if(response.body !== null) {
+      if (response.body !== null) {
         callback(null, response.body);
       } else {
         callback('No body');
       }
-
     });
-
   };
 
   // ## Add an issue to the project's current sprint ##
@@ -372,22 +386,23 @@ var JiraApi = exports.JiraApi = function(
    * @param callback
    */
   this.addIssueToSprint = function(issueId, sprintId, callback) {
-
     var options = {
       rejectUnauthorized: this.strictSSL,
-      uri: this.makeUri('/sprint/' + sprintId + '/issues/add', 'rest/greenhopper/'),
+      uri: this.makeUri(
+        '/sprint/' + sprintId + '/issues/add',
+        'rest/greenhopper/',
+      ),
       method: 'PUT',
       followAllRedirects: true,
-      json:true,
+      json: true,
       body: {
-        issueKeys: [issueId]
-      }
+        issueKeys: [issueId],
+      },
     };
 
     logger.log(options.uri);
 
     this.doRequest(options, function(error, response) {
-
       if (error) {
         callback(error, null);
         return;
@@ -399,10 +414,11 @@ var JiraApi = exports.JiraApi = function(
       }
 
       if (response.statusCode !== 204) {
-        callback(response.statusCode + ': Unable to connect to JIRA to add to sprint.');
+        callback(
+          response.statusCode + ': Unable to connect to JIRA to add to sprint.',
+        );
         return;
       }
-
     });
   };
 
@@ -417,7 +433,8 @@ var JiraApi = exports.JiraApi = function(
   //
   // [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id296682)
   /**
-   * Creates an issue link between two issues. Link should follow the below format:
+   * Creates an issue link between two issues. Link should follow the below
+   * format:
    *
    * {
    *   'linkType': 'Duplicate',
@@ -436,18 +453,16 @@ var JiraApi = exports.JiraApi = function(
    * @param callback
    */
   this.issueLink = function(link, callback) {
-
     var options = {
       rejectUnauthorized: this.strictSSL,
       uri: this.makeUri('/issueLink'),
       method: 'POST',
       followAllRedirects: true,
       json: true,
-      body: link
+      body: link,
     };
 
     this.doRequest(options, function(error, response) {
-
       if (error) {
         callback(error, null);
         return;
@@ -459,12 +474,13 @@ var JiraApi = exports.JiraApi = function(
       }
 
       if (response.statusCode !== 200) {
-        callback(response.statusCode + ': Unable to connect to JIRA during issueLink.');
+        callback(
+          response.statusCode + ': Unable to connect to JIRA during issueLink.',
+        );
         return;
       }
 
       callback(null);
-
     });
   };
 
@@ -479,15 +495,13 @@ var JiraApi = exports.JiraApi = function(
   //
   // [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id289653)
   this.getVersions = function(project, callback) {
-
     var options = {
       rejectUnauthorized: this.strictSSL,
       uri: this.makeUri('/project/' + project + '/versions'),
-      method: 'GET'
+      method: 'GET',
     };
 
     this.doRequest(options, function(error, response, body) {
-
       if (error) {
         callback(error, null);
         return;
@@ -499,13 +513,15 @@ var JiraApi = exports.JiraApi = function(
       }
 
       if (response.statusCode !== 200) {
-        callback(response.statusCode + ': Unable to connect to JIRA during getVersions.');
+        callback(
+          response.statusCode +
+            ': Unable to connect to JIRA during getVersions.',
+        );
         return;
       }
 
       body = JSON.parse(body);
       callback(null, body);
-
     });
   };
 
@@ -533,39 +549,44 @@ var JiraApi = exports.JiraApi = function(
    * }
    */
   this.createVersion = function(version, callback) {
-
     var options = {
       rejectUnauthorized: this.strictSSL,
       uri: this.makeUri('/version'),
       method: 'POST',
       followAllRedirects: true,
       json: true,
-      body: version
+      body: version,
     };
     this.doRequest(options, function(error, response, body) {
-
       if (error) {
         callback(error, null);
         return;
       }
 
       if (response.statusCode === 404) {
-        callback('Version does not exist or the currently authenticated user does not have permission to view it');
+        callback(
+          'Version does not exist or the currently authenticated ' +
+            'user does not have permission to view it',
+        );
         return;
       }
 
       if (response.statusCode === 403) {
-        callback('The currently authenticated user does not have permission to edit the version');
+        callback(
+          'The currently authenticated user does not have permission to edit the version',
+        );
         return;
       }
 
       if (response.statusCode !== 201) {
-        callback(response.statusCode + ': Unable to connect to JIRA during createVersion.');
+        callback(
+          response.statusCode +
+            ': Unable to connect to JIRA during createVersion.',
+        );
         return;
       }
 
       callback(null, body);
-
     });
   };
 
@@ -596,37 +617,42 @@ var JiraApi = exports.JiraApi = function(
   this.updateVersion = function(version, callback) {
     var options = {
       rejectUnauthorized: this.strictSSL,
-      uri: this.makeUri('/version/'+version.id),
+      uri: this.makeUri('/version/' + version.id),
       method: 'PUT',
       followAllRedirects: true,
       json: true,
-      body: version
+      body: version,
     };
 
     this.doRequest(options, function(error, response, body) {
-
       if (error) {
         callback(error, null);
         return;
       }
 
       if (response.statusCode === 404) {
-        callback('Version does not exist or the currently authenticated user does not have permission to view it');
+        callback(
+          'Version does not exist or the currently authenticated user does not have permission to view it',
+        );
         return;
       }
 
       if (response.statusCode === 403) {
-        callback('The currently authenticated user does not have permission to edit the version');
+        callback(
+          'The currently authenticated user does not have permission to edit the version',
+        );
         return;
       }
 
       if (response.statusCode !== 200) {
-        callback(response.statusCode + ': Unable to connect to JIRA during updateVersion.');
+        callback(
+          response.statusCode +
+            ': Unable to connect to JIRA during updateVersion.',
+        );
         return;
       }
 
       callback(null, body);
-
     });
   };
 
@@ -654,7 +680,7 @@ var JiraApi = exports.JiraApi = function(
     // backwards compatibility
     optional = optional || {};
     if (Array.isArray(optional)) {
-      optional = { fields: optional };
+      optional = {fields: optional};
     }
 
     var options = {
@@ -667,12 +693,16 @@ var JiraApi = exports.JiraApi = function(
         jql: searchString,
         startAt: optional.startAt || 0,
         maxResults: optional.maxResults || 50,
-        fields: optional.fields || ["summary", "status", "assignee", "description"]
-      }
+        fields: optional.fields || [
+          'summary',
+          'status',
+          'assignee',
+          'description',
+        ],
+      },
     };
 
     this.doRequest(options, function(error, response, body) {
-
       if (error) {
         callback(error, null);
         return;
@@ -684,12 +714,13 @@ var JiraApi = exports.JiraApi = function(
       }
 
       if (response.statusCode !== 200) {
-        callback(response.statusCode + ': Unable to connect to JIRA during search.');
+        callback(
+          response.statusCode + ': Unable to connect to JIRA during search.',
+        );
         return;
       }
 
       callback(null, body);
-
     });
   };
 
@@ -710,27 +741,39 @@ var JiraApi = exports.JiraApi = function(
   //
   // [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#d2e3756)
   //
-  this.searchUsers = function(username, startAt, maxResults, includeActive, includeInactive, callback) {
-    startAt = (startAt !== undefined) ? startAt : 0;
-    maxResults = (maxResults !== undefined) ? maxResults : 50;
-    includeActive = (includeActive !== undefined) ? includeActive : true;
-    includeInactive = (includeInactive !== undefined) ? includeInactive : false;
+  this.searchUsers = function(
+    username,
+    startAt,
+    maxResults,
+    includeActive,
+    includeInactive,
+    callback,
+  ) {
+    startAt = startAt !== undefined ? startAt : 0;
+    maxResults = maxResults !== undefined ? maxResults : 50;
+    includeActive = includeActive !== undefined ? includeActive : true;
+    includeInactive = includeInactive !== undefined ? includeInactive : false;
 
     var options = {
       rejectUnauthorized: this.strictSSL,
       uri: this.makeUri(
-        '/user/search?username=' + username +
-        '&startAt=' + startAt +
-        '&maxResults=' + maxResults +
-        '&includeActive=' + includeActive +
-        '&includeInactive=' + includeInactive),
+        '/user/search?username=' +
+          username +
+          '&startAt=' +
+          startAt +
+          '&maxResults=' +
+          maxResults +
+          '&includeActive=' +
+          includeActive +
+          '&includeInactive=' +
+          includeInactive,
+      ),
       method: 'GET',
       json: true,
-      followAllRedirects: true
+      followAllRedirects: true,
     };
 
     this.doRequest(options, function(error, response, body) {
-
       if (error) {
         callback(error, null);
         return;
@@ -742,12 +785,13 @@ var JiraApi = exports.JiraApi = function(
       }
 
       if (response.statusCode !== 200) {
-        callback(response.statusCode + ': Unable to connect to JIRA during search.');
+        callback(
+          response.statusCode + ': Unable to connect to JIRA during search.',
+        );
         return;
       }
 
       callback(null, body);
-
     });
   };
 
@@ -766,12 +810,14 @@ var JiraApi = exports.JiraApi = function(
   // [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id296043)
   //
   this.getUsersIssues = function(username, open, callback) {
-    if (username.indexOf("@") > -1) {
-      username = username.replace("@", '\\u0040');
+    if (username.indexOf('@') > -1) {
+      username = username.replace('@', '\\u0040');
     }
-    var jql = "assignee = " + username;
+    var jql = 'assignee = ' + username;
     var openText = ' AND status in (Open, "In Progress", Reopened)';
-    if (open) { jql += openText; }
+    if (open) {
+      jql += openText;
+    }
     this.searchJira(jql, {}, callback);
   };
 
@@ -782,13 +828,11 @@ var JiraApi = exports.JiraApi = function(
       method: 'POST',
       followAllRedirects: true,
       json: true,
-      body: issue
+      body: issue,
     };
 
     return new Promise((resolve, reject) => {
-
       this.doRequest(options, function(error, response, body) {
-
         if (error) {
           reject(error);
           return;
@@ -799,13 +843,14 @@ var JiraApi = exports.JiraApi = function(
           return;
         }
 
-        if ((response.statusCode !== 200) && (response.statusCode !== 201)) {
-          reject(response.statusCode + ': Unable to connect to JIRA during search.');
+        if (response.statusCode !== 200 && response.statusCode !== 201) {
+          reject(
+            response.statusCode + ': Unable to connect to JIRA during search.',
+          );
           return;
         }
 
         resolve(body);
-
       });
     });
   };
@@ -817,23 +862,21 @@ var JiraApi = exports.JiraApi = function(
       uri: this.makeUri('/issue/' + issueNum),
       method: 'DELETE',
       followAllRedirects: true,
-      json: true
+      json: true,
     };
 
     this.doRequest(options, function(error, response) {
-
       if (error) {
         callback(error, null);
         return;
       }
 
       if (response.statusCode === 204) {
-        callback(null, "Success");
+        callback(null, 'Success');
         return;
       }
 
       callback(response.statusCode + ': Error while deleting');
-
     });
   };
 
@@ -845,23 +888,21 @@ var JiraApi = exports.JiraApi = function(
       body: issueUpdate,
       method: 'PUT',
       followAllRedirects: true,
-      json: true
+      json: true,
     };
 
     this.doRequest(options, function(error, response) {
-
       if (error) {
         callback(error, null);
         return;
       }
 
       if (response.statusCode === 200 || response.statusCode === 204) {
-        callback(null, "Success");
+        callback(null, 'Success');
         return;
       }
 
       callback(response.statusCode + ': Error while updating');
-
     });
   };
 
@@ -904,11 +945,10 @@ var JiraApi = exports.JiraApi = function(
       rejectUnauthorized: this.strictSSL,
       uri: this.makeUri('/project/' + project + '/components'),
       method: 'GET',
-      json: true
+      json: true,
     };
 
     this.doRequest(options, function(error, response, body) {
-
       if (error) {
         callback(error, null);
         return;
@@ -919,12 +959,11 @@ var JiraApi = exports.JiraApi = function(
         return;
       }
       if (response.statusCode === 404) {
-        callback("Project not found");
+        callback('Project not found');
         return;
       }
 
       callback(response.statusCode + ': Error while updating');
-
     });
   };
 
@@ -957,11 +996,10 @@ var JiraApi = exports.JiraApi = function(
       rejectUnauthorized: this.strictSSL,
       uri: this.makeUri('/field'),
       method: 'GET',
-      json: true
+      json: true,
     };
 
     this.doRequest(options, function(error, response, body) {
-
       if (error) {
         callback(error, null);
         return;
@@ -972,12 +1010,11 @@ var JiraApi = exports.JiraApi = function(
         return;
       }
       if (response.statusCode === 404) {
-        callback("Not found");
+        callback('Not found');
         return;
       }
 
       callback(response.statusCode + ': Error while updating');
-
     });
   };
 
@@ -1005,11 +1042,10 @@ var JiraApi = exports.JiraApi = function(
       rejectUnauthorized: this.strictSSL,
       uri: this.makeUri('/priority'),
       method: 'GET',
-      json: true
+      json: true,
     };
 
     this.doRequest(options, function(error, response, body) {
-
       if (error) {
         callback(error, null);
         return;
@@ -1020,12 +1056,11 @@ var JiraApi = exports.JiraApi = function(
         return;
       }
       if (response.statusCode === 404) {
-        callback("Not found");
+        callback('Not found');
         return;
       }
 
       callback(response.statusCode + ': Error while updating');
-
     });
   };
 
@@ -1080,9 +1115,11 @@ var JiraApi = exports.JiraApi = function(
   this.listTransitions = function(issueId, callback) {
     var options = {
       rejectUnauthorized: this.strictSSL,
-      uri: this.makeUri('/issue/' + issueId + '/transitions?expand=transitions.fields'),
+      uri: this.makeUri(
+        '/issue/' + issueId + '/transitions?expand=transitions.fields',
+      ),
       method: 'GET',
-      json: true
+      json: true,
     };
 
     return new Promise((resolve, reject) => {
@@ -1096,7 +1133,7 @@ var JiraApi = exports.JiraApi = function(
           return;
         }
         if (response.statusCode === 404) {
-          reject("Issue not found");
+          reject('Issue not found');
           return;
         }
         reject(response.statusCode + ': Error while updating');
@@ -1123,7 +1160,7 @@ var JiraApi = exports.JiraApi = function(
       body: issueTransition,
       method: 'POST',
       followAllRedirects: true,
-      json: true
+      json: true,
     };
 
     return new Promise((resolve, reject) => {
@@ -1170,11 +1207,10 @@ var JiraApi = exports.JiraApi = function(
       rejectUnauthorized: this.strictSSL,
       uri: this.makeUri('/project'),
       method: 'GET',
-      json: true
+      json: true,
     };
 
     this.doRequest(options, function(error, response, body) {
-
       if (error) {
         callback(error, null);
         return;
@@ -1190,7 +1226,6 @@ var JiraApi = exports.JiraApi = function(
       }
 
       callback(response.statusCode + ': Error while updating');
-
     });
   };
 
@@ -1205,46 +1240,45 @@ var JiraApi = exports.JiraApi = function(
   // *  success string
   //
   // [Jira Doc](https://docs.atlassian.com/jira/REST/latest/#id108798)
-  this.addComment = function(issueId, comment, callback){
+  this.addComment = function(issueId, comment, callback) {
     var options = {
       rejectUnauthorized: this.strictSSL,
       uri: this.makeUri('/issue/' + issueId + '/comment'),
       body: {
-        "body": comment
+        body: comment,
       },
       method: 'POST',
       followAllRedirects: true,
-      json: true
+      json: true,
     };
 
     return new Promise((resolve, reject) => {
-
       this.doRequest(options, function(error, response, body) {
         if (error) {
           reject(error);
           return;
         }
         if (response.statusCode === 201) {
-          resolve("Success");
+          resolve('Success');
           return;
         }
         if (response.statusCode === 400) {
-          reject("Invalid Fields: " + JSON.stringify(body));
+          reject('Invalid Fields: ' + JSON.stringify(body));
           return;
-        };
+        }
         reject(response.statusCode + ': Error while adding comment');
       });
     });
   };
 
-  this.assignIssue = function(issueId, username, callback){
+  this.assignIssue = function(issueId, username, callback) {
     var options = {
       rejectUnauthorized: this.strictSSL,
       uri: this.makeUri('/issue/' + issueId + '/assignee'),
-      body: { name: username },
+      body: {name: username},
       method: 'PUT',
       followAllRedirects: true,
-      json: true
+      json: true,
     };
 
     return new Promise((resolve, reject) => {
@@ -1254,13 +1288,13 @@ var JiraApi = exports.JiraApi = function(
           return;
         }
         if (response.statusCode === 204) {
-          resolve("Success");
+          resolve('Success');
           return;
         }
         if (response.statusCode === 400) {
-          reject("Invalid Fields: " + JSON.stringify(body));
+          reject('Invalid Fields: ' + JSON.stringify(body));
           return;
-        };
+        }
         reject(response.statusCode + ': Error');
       });
     });
@@ -1305,41 +1339,44 @@ var JiraApi = exports.JiraApi = function(
    *  }
    */
   this.addWorklog = function(issueId, worklog, newEstimate, callback) {
-    if(typeof callback == 'undefined') {
+    if (typeof callback == 'undefined') {
       callback = newEstimate;
       newEstimate = false;
     }
     var options = {
       rejectUnauthorized: this.strictSSL,
-      uri: this.makeUri('/issue/' + issueId + '/worklog' + (newEstimate ? "?adjustEstimate=new&newEstimate=" + newEstimate : "")),
+      uri: this.makeUri(
+        '/issue/' +
+          issueId +
+          '/worklog' +
+          (newEstimate ? '?adjustEstimate=new&newEstimate=' + newEstimate : ''),
+      ),
       body: worklog,
       method: 'POST',
       followAllRedirects: true,
-      json: true
+      json: true,
     };
 
     this.doRequest(options, function(error, response, body) {
-
       if (error) {
         callback(error, null);
         return;
       }
 
       if (response.statusCode === 201) {
-        callback(null, "Success");
+        callback(null, 'Success');
         return;
       }
       if (response.statusCode === 400) {
-        callback("Invalid Fields: " + JSON.stringify(body));
+        callback('Invalid Fields: ' + JSON.stringify(body));
         return;
       }
       if (response.statusCode === 403) {
-        callback("Insufficient Permissions");
+        callback('Insufficient Permissions');
         return;
       }
 
       callback(response.statusCode + ': Error while updating');
-
     });
   };
 
@@ -1369,11 +1406,10 @@ var JiraApi = exports.JiraApi = function(
       rejectUnauthorized: this.strictSSL,
       uri: this.makeUri('/issuetype'),
       method: 'GET',
-      json: true
+      json: true,
     };
 
     this.doRequest(options, function(error, response, body) {
-
       if (error) {
         callback(error, null);
         return;
@@ -1385,7 +1421,6 @@ var JiraApi = exports.JiraApi = function(
       }
 
       callback(response.statusCode + ': Error while retrieving issue types');
-
     });
   };
 
@@ -1421,11 +1456,10 @@ var JiraApi = exports.JiraApi = function(
       uri: this.makeUri('/webhook', 'rest/webhooks/', '1.0'),
       method: 'POST',
       json: true,
-      body: webhook
+      body: webhook,
     };
 
     this.request(options, function(error, response, body) {
-
       if (error) {
         callback(error, null);
         return;
@@ -1437,7 +1471,6 @@ var JiraApi = exports.JiraApi = function(
       }
 
       callback(response.statusCode + ': Error while registering new webhook');
-
     });
   };
 
@@ -1471,11 +1504,10 @@ var JiraApi = exports.JiraApi = function(
       rejectUnauthorized: this.strictSSL,
       uri: this.makeUri('/webhook', 'rest/webhooks/', '1.0'),
       method: 'GET',
-      json: true
+      json: true,
     };
 
     this.request(options, function(error, response, body) {
-
       if (error) {
         callback(error, null);
         return;
@@ -1487,7 +1519,6 @@ var JiraApi = exports.JiraApi = function(
       }
 
       callback(response.statusCode + ': Error while listing webhooks');
-
     });
   };
 
@@ -1507,11 +1538,10 @@ var JiraApi = exports.JiraApi = function(
       rejectUnauthorized: this.strictSSL,
       uri: this.makeUri('/webhook/' + webhookID, 'rest/webhooks/', '1.0'),
       method: 'GET',
-      json: true
+      json: true,
     };
 
     this.request(options, function(error, response, body) {
-
       if (error) {
         callback(error, null);
         return;
@@ -1523,7 +1553,6 @@ var JiraApi = exports.JiraApi = function(
       }
 
       callback(response.statusCode + ': Error while getting webhook');
-
     });
   };
 
@@ -1543,23 +1572,21 @@ var JiraApi = exports.JiraApi = function(
       rejectUnauthorized: this.strictSSL,
       uri: this.makeUri('/webhook/' + webhookID, 'rest/webhooks/', '1.0'),
       method: 'DELETE',
-      json: true
+      json: true,
     };
 
     this.request(options, function(error, response, body) {
-
       if (error) {
         callback(error, null);
         return;
       }
 
       if (response.statusCode === 204) {
-        callback(null, "Success");
+        callback(null, 'Success');
         return;
       }
 
       callback(response.statusCode + ': Error while deleting webhook');
-
     });
   };
 
@@ -1592,11 +1619,10 @@ var JiraApi = exports.JiraApi = function(
       rejectUnauthorized: this.strictSSL,
       uri: this.makeUri('/session', 'rest/auth/', '1'),
       method: 'GET',
-      json: true
+      json: true,
     };
 
     this.doRequest(options, function(error, response, body) {
-
       if (error) {
         callback(error, null);
         return;
@@ -1608,7 +1634,6 @@ var JiraApi = exports.JiraApi = function(
       }
 
       callback(response.statusCode + ': Error while getting current user');
-
     });
   };
 
@@ -1681,9 +1706,12 @@ var JiraApi = exports.JiraApi = function(
   this.getBacklogForRapidView = function(rapidViewId, callback) {
     var options = {
       rejectUnauthorized: this.strictSSL,
-      uri: this.makeUri('/xboard/plan/backlog/data?rapidViewId=' + rapidViewId, 'rest/greenhopper/'),
+      uri: this.makeUri(
+        '/xboard/plan/backlog/data?rapidViewId=' + rapidViewId,
+        'rest/greenhopper/',
+      ),
       method: 'GET',
-      json: true
+      json: true,
     };
 
     this.doRequest(options, function(error, response) {
@@ -1702,5 +1730,4 @@ var JiraApi = exports.JiraApi = function(
       callback(response.statusCode + ': Error while retrieving backlog');
     });
   };
-
-}).call(JiraApi.prototype);
+}.call(JiraApi.prototype));
