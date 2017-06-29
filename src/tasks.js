@@ -45,7 +45,7 @@ exports.createIssue = async issueTitle => {
   const issue = await jira.createIssue(issueTitle);
 
   if (await input.ask(`Start issue ${issue.key} now?`)) {
-    exports.start(issue.key);
+    return exports.start(issue.key);
   }
 };
 
@@ -143,14 +143,14 @@ exports.done = async username => {
   }
 
   if (!await git.isRepoClean()) {
-    console.error('Repo is not clean!');
+    console.log('Repo is not clean!');
     return;
   }
 
   await git.merge('master', currentBranchName);
 
   if (!await git.isRepoClean()) {
-    console.error('There is conflict after merge, please fix it!');
+    console.log('There is conflict after merge, please fix it!');
     return;
   }
 
