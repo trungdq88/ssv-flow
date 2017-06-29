@@ -14,19 +14,26 @@ const {
 } = config;
 
 const jiraApi = new JiraApi(
-  config.protocol, config.host, config.port, config.user, config.password, 'latest'
+  config.protocol,
+  config.host,
+  config.port,
+  config.user,
+  config.password,
+  'latest',
 );
 
 exports.openIssue = issueKey => {
   opn(
-    config.protocol + '://' + config.host +
-    '/browse/SE-' + issueKey.replace(/^SE-/, '')
+    config.protocol +
+      '://' +
+      config.host +
+      '/browse/SE-' +
+      issueKey.replace(/^SE-/, ''),
   );
   process.exit();
 };
 
 exports.createIssue = async issueTitle => {
-
   const projectKey = 'SE';
 
   console.log(`Get project information code "${projectKey}"`);
@@ -41,23 +48,25 @@ exports.createIssue = async issueTitle => {
   const issueFields = {
     fields: {
       project: {
-        id: PROJECT_SE
+        id: PROJECT_SE,
       },
       summary: issueTitle,
       issuetype: {
-        id: ISSUE_TYPE_TASK
+        id: ISSUE_TYPE_TASK,
       },
       assignee: {
-        name: ME
+        name: ME,
       },
       priority: {
-        id: PRIORITY_MEDIUM
+        id: PRIORITY_MEDIUM,
       },
-      components: [{
-        id: COMPONENT_HQ_FRONTEND
-      }],
+      components: [
+        {
+          id: COMPONENT_HQ_FRONTEND,
+        },
+      ],
       [SPRINT_CUSTOM_FIELD_ID]: activeSprint.id,
-    }
+    },
   };
 
   console.log(`Creating issue in ${activeSprint.name}...`);
@@ -74,25 +83,24 @@ exports.findIssue = issueKey => {
 exports.assignIssue = async (issueKey, username) => {
   for (let i = 0; i < ISSUE_TRANSITIONS.length; i++) {
     const transitionName = ISSUE_TRANSITIONS[i];
-    const availableTransitions = (
-      await jiraApi.listTransitions(issueKey)
-    ).transitions;
+    const availableTransitions = (await jiraApi.listTransitions(issueKey))
+      .transitions;
     const nextTransition = availableTransitions.find(
-      transition => transition.name.toLowerCase() ===
-      transitionName.toLowerCase()
+      transition =>
+        transition.name.toLowerCase() === transitionName.toLowerCase(),
     );
 
     if (!nextTransition) {
       throw new Error(
         `Transition "${transitionName}" not found in available` +
-        ` transitions of issue ${issueKey}:\n` +
-        `${availableTransitions.map(_ => _.name).join('\n')}`
+          ` transitions of issue ${issueKey}:\n` +
+          `${availableTransitions.map(_ => _.name).join('\n')}`,
       );
     }
 
     console.log(`Moving ${issueKey} to ${nextTransition.name}...`);
     await jiraApi.transitionIssue(issueKey, {
-      transition: nextTransition
+      transition: nextTransition,
     });
   }
 

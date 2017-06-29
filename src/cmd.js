@@ -7,7 +7,7 @@ exports.runTests = () => {
       stdio: 'inherit',
       env,
     });
-    p.on('exit', (code) => {
+    p.on('exit', code => {
       if (code === 0) {
         resolve(code);
       } else {
@@ -26,7 +26,7 @@ exports.deploy = () => {
       stdio: 'inherit',
       env,
     });
-    p.on('exit', (code) => {
+    p.on('exit', code => {
       if (code === 0) {
         resolve(0);
       } else {

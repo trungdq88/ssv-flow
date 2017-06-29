@@ -23,13 +23,13 @@ describe('commit-tag.js', () => {
 
   it('HQ ANALYTICS', () => {
     expect(
-      commitTag(['src/portals/ana/aoeu/aoeu', 'src/portals/hq/aoeu/aoeu'])
+      commitTag(['src/portals/ana/aoeu/aoeu', 'src/portals/hq/aoeu/aoeu']),
     ).toBe('[HQ/ANA]');
   });
 
   it('CDC LOG', () => {
     expect(
-      commitTag(['src/portals/log/aoeu/aoeu', 'src/portals/cdc/aoeu/aoeu'])
+      commitTag(['src/portals/log/aoeu/aoeu', 'src/portals/cdc/aoeu/aoeu']),
     ).toBe('[LOG/CDC]');
   });
 
@@ -38,8 +38,8 @@ describe('commit-tag.js', () => {
       commitTag([
         'src/portals/sup/aoeu/aoeu',
         'src/portals/hq/aoeu/aoeu',
-        'src/portals/cdc/aoeu/aoeu'
-      ])
+        'src/portals/cdc/aoeu/aoeu',
+      ]),
     ).toBe('[HQ/SUP/CDC]');
   });
 
@@ -49,7 +49,7 @@ describe('commit-tag.js', () => {
 
   it('SHARED HQ', () => {
     expect(
-      commitTag(['src/portals/_shared/aoeu/aoeu', 'src/portals/hq/aoeu/aoeu'])
+      commitTag(['src/portals/_shared/aoeu/aoeu', 'src/portals/hq/aoeu/aoeu']),
     ).toBe('[SHARED/HQ]');
   });
 
@@ -59,7 +59,7 @@ describe('commit-tag.js', () => {
 
   it('CONFIG', () => {
     expect(commitTag(['src/portals/aoeu', 'src/portals/index.js'])).toBe(
-      '[CONFIG]'
+      '[CONFIG]',
     );
   });
 

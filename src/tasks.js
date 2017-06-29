@@ -5,11 +5,11 @@ const input = require('./input.js');
 const cmd = require('./cmd.js');
 const slug = require('./utils/slug.js');
 
-const { REMOTE_NAME } = config;
+const {REMOTE_NAME} = config;
 
 exports.openIssue = (...args) => jira.openIssue(...args);
 
-exports.start = async (issueKey) => {
+exports.start = async issueKey => {
   // Check repo clean
   if (!await git.isRepoClean()) {
     console.error('Repo is not clean!');
@@ -20,7 +20,7 @@ exports.start = async (issueKey) => {
   const issue = await jira.findIssue(issueKey);
   const branchName = issue.key + '/' + slug(issue.fields.summary);
 
-  if (!(await git.isBranchLocalExists(branchName))) {
+  if (!await git.isBranchLocalExists(branchName)) {
     console.log('Check out master');
     await git.checkOut('master');
 
@@ -40,7 +40,7 @@ exports.start = async (issueKey) => {
   console.log('Done! Happy coding!');
 };
 
-exports.createIssue = async (issueTitle) => {
+exports.createIssue = async issueTitle => {
   console.log(`Creating issue ${issueTitle}`);
   const issue = await jira.createIssue(issueTitle);
 
@@ -50,7 +50,6 @@ exports.createIssue = async (issueTitle) => {
 };
 
 exports.commit = async fastCommitMessage => {
-
   const isClean = await git.isRepoClean();
 
   if (isClean) {
@@ -73,7 +72,7 @@ exports.commit = async fastCommitMessage => {
     await addAll();
     return await new Promise((resolve, reject) => {
       const spawn = require('child_process').spawn;
-      const gitDiff = spawn('git', ['diff', '--staged'], { stdio: 'inherit' });
+      const gitDiff = spawn('git', ['diff', '--staged'], {stdio: 'inherit'});
       gitDiff.on('exit', resolve);
     });
   }
@@ -97,7 +96,7 @@ exports.commit = async fastCommitMessage => {
       userMessage = `${issue.fields.summary}`;
     }
 
-    const commitTag = await git.getCommitTag()
+    const commitTag = await git.getCommitTag();
     const commitMessage = `${commitTag} [${issueKey}] ${userMessage}`;
 
     console.log('Committing:', commitMessage);
@@ -108,11 +107,15 @@ exports.commit = async fastCommitMessage => {
     console.log('Cancelled');
   }
 
-  const choice = await input.choice('Please select an action', [
-    { value: 'd', key: 'd', name: 'Show diff' },
-    { value: 'a', key: 'a', name: 'Add all & write commit message' },
-    { value: 'c', key: 'c', name: 'Cancel' },
-  ], 1);
+  const choice = await input.choice(
+    'Please select an action',
+    [
+      {value: 'd', key: 'd', name: 'Show diff'},
+      {value: 'a', key: 'a', name: 'Add all & write commit message'},
+      {value: 'c', key: 'c', name: 'Cancel'},
+    ],
+    1,
+  );
   switch (choice) {
     case 'd':
       await diff();
