@@ -96,11 +96,13 @@ exports.moveIssue = async (issueKey, username) => {
     );
 
     if (!nextTransition) {
-      throw new Error(
+      console.log(
         `Transition "${transitionName}" not found in available` +
           ` transitions of issue ${issueKey}:\n` +
           `${availableTransitions.map(_ => _.name).join('\n')}`,
       );
+      console.log('Skip to next transition');
+      continue;
     }
 
     console.log(`Moving ${issueKey} to ${nextTransition.name}...`);

@@ -174,3 +174,7 @@ exports.done = async username => {
 
   console.log('Done');
 };
+
+exports.moveIssue = async (issueKey, username) => {
+  return jira.moveIssue(issueKey, username);
+};
