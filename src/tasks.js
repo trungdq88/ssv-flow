@@ -1,3 +1,4 @@
+// @format
 const config = require('./config.js');
 const jira = require('./jira.js');
 const git = require('./git.js');
@@ -5,11 +6,17 @@ const input = require('./input.js');
 const cmd = require('./cmd.js');
 const slug = require('./utils/slug.js');
 
-const {REMOTE_NAME} = config;
+const {PROJECT_CODE, REMOTE_NAME} = config;
 
-exports.openIssue = (...args) => jira.openIssue(...args);
+const getFullIssueKey = issueKey =>
+  PROJECT_CODE +
+  '-' +
+  issueKey.replace(new RegExp('^' + PROJECT_CODE + '-'), '');
 
-exports.start = async issueKey => {
+exports.openIssue = issueKey => jira.openIssue(getFullIssueKey(issueKey));
+
+exports.start = async shortIssueKey => {
+  const issueKey = getFullIssueKey(shortIssueKey);
   // Check repo clean
   if (!await git.isRepoClean()) {
     console.error('Repo is not clean!');
@@ -176,5 +183,5 @@ exports.done = async username => {
 };
 
 exports.moveIssue = async (issueKey, username) => {
-  return jira.moveIssue(issueKey, username);
+  return jira.moveIssue(getFullIssueKey(issueKey), username);
 };

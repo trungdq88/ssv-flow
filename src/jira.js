@@ -25,15 +25,7 @@ const jiraApi = new JiraApi(
 );
 
 exports.openIssue = issueKey => {
-  opn(
-    config.protocol +
-      '://' +
-      config.host +
-      '/browse/' +
-      PROJECT_CODE +
-      '-' +
-      issueKey.replace(new RegExp('^' + PROJECT_CODE + '-'), ''),
-  );
+  opn(config.protocol + '://' + config.host + '/browse/' + issueKey);
 };
 
 exports.createIssue = async issueTitle => {
@@ -78,11 +70,7 @@ exports.createIssue = async issueTitle => {
 };
 
 exports.findIssue = issueKey => {
-  return jiraApi.findIssue(
-    PROJECT_CODE +
-      '-' +
-      issueKey.replace(new RegExp('^' + PROJECT_CODE + '-'), ''),
-  );
+  return jiraApi.findIssue(issueKey);
 };
 
 exports.moveIssue = async (issueKey, username) => {

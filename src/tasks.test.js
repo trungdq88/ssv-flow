@@ -32,7 +32,7 @@ describe('tasks.js', () => {
     const mockSlug = require('./utils/slug.js');
     mockSlug.mockImplementation(_ => _);
     mockJira.findIssue.mockImplementation(() => ({
-      key: '123',
+      key: 'SE-123',
       fields: {summary: 'abc'},
     }));
     mockGit.isRepoClean.mockImplementation(() => true);
@@ -41,12 +41,12 @@ describe('tasks.js', () => {
 
     await tasks.start('issueKey');
     expect(mockGit.isRepoClean).toBeCalledWith();
-    expect(mockJira.findIssue).toBeCalledWith('issueKey');
-    expect(mockGit.isBranchLocalExists).toBeCalledWith('123/abc');
+    expect(mockJira.findIssue).toBeCalledWith('SE-issueKey');
+    expect(mockGit.isBranchLocalExists).toBeCalledWith('SE-123/abc');
     expect(console.log.mock.calls.map(_ => _.join(''))).toEqual([
-      'Get issue issueKey info',
-      'Issue: 123 / abc',
-      'Branch 123/abc already exist, checking out.',
+      'Get issue SE-issueKey info',
+      'Issue: SE-123 / abc',
+      'Branch SE-123/abc already exist, checking out.',
       'Done! Happy coding!',
     ]);
     console.log = log;
@@ -61,7 +61,7 @@ describe('tasks.js', () => {
     const mockSlug = require('./utils/slug.js');
     mockSlug.mockImplementation(_ => _);
     mockJira.findIssue.mockImplementation(() => ({
-      key: '123',
+      key: 'SE-123',
       fields: {summary: 'abc'},
     }));
     mockGit.isRepoClean.mockImplementation(() => true);
@@ -73,19 +73,19 @@ describe('tasks.js', () => {
 
     await tasks.start('issueKey');
     expect(mockGit.isRepoClean).toBeCalledWith();
-    expect(mockJira.findIssue).toBeCalledWith('issueKey');
-    expect(mockGit.isBranchLocalExists).toBeCalledWith('123/abc');
+    expect(mockJira.findIssue).toBeCalledWith('SE-issueKey');
+    expect(mockGit.isBranchLocalExists).toBeCalledWith('SE-123/abc');
     expect(mockGit.checkout).toBeCalledWith('master');
     expect(mockGit.pull).toBeCalledWith();
-    expect(mockGit.createBranch).toBeCalledWith('123/abc');
-    expect(mockGit.push).toBeCalledWith('remote', '123/abc');
+    expect(mockGit.createBranch).toBeCalledWith('SE-123/abc');
+    expect(mockGit.push).toBeCalledWith('remote', 'SE-123/abc');
     expect(console.log.mock.calls.map(_ => _.join(''))).toEqual([
-      'Get issue issueKey info',
-      'Issue: 123 / abc',
+      'Get issue SE-issueKey info',
+      'Issue: SE-123 / abc',
       'Check out master',
       'Pull master',
-      'Creating branch 123/abc',
-      'Push branch 123/abc',
+      'Creating branch SE-123/abc',
+      'Push branch SE-123/abc',
       'Done! Happy coding!',
     ]);
     console.log = log;
@@ -97,12 +97,12 @@ describe('tasks.js', () => {
     const mockJira = require('./jira.js');
     const mockInput = require('./input.js');
     mockJira.createIssue.mockImplementation(() => ({
-      key: 123,
+      key: 'SE-123',
     }));
     mockInput.ask.mockImplementation(() => false);
     await tasks.createIssue('title');
     expect(mockJira.createIssue).toBeCalledWith('title');
-    expect(mockInput.ask).toBeCalledWith('Start issue 123 now?');
+    expect(mockInput.ask).toBeCalledWith('Start issue SE-123 now?');
     expect(console.log.mock.calls.map(_ => _.join(''))).toEqual([
       'Creating issue title',
     ]);
@@ -116,7 +116,7 @@ describe('tasks.js', () => {
     const mockJira = require('./jira.js');
     const mockInput = require('./input.js');
     mockJira.createIssue.mockImplementation(() => ({
-      key: '123',
+      key: 'SE-123',
       summary: 'abc',
     }));
     mockInput.ask.mockImplementation(() => true);
@@ -126,14 +126,14 @@ describe('tasks.js', () => {
     mockGit.isBranchLocalExists.mockImplementation(() => true);
     await tasks.createIssue('title');
     expect(mockJira.createIssue).toBeCalledWith('title');
-    expect(mockInput.ask).toBeCalledWith('Start issue 123 now?');
-    expect(mockJira.findIssue).toBeCalledWith('123');
-    expect(mockGit.isBranchLocalExists).toBeCalledWith('123/abc');
+    expect(mockInput.ask).toBeCalledWith('Start issue SE-123 now?');
+    expect(mockJira.findIssue).toBeCalledWith('SE-123');
+    expect(mockGit.isBranchLocalExists).toBeCalledWith('SE-123/abc');
     expect(console.log.mock.calls.map(_ => _.join(''))).toEqual([
       'Creating issue title',
-      'Get issue 123 info',
-      'Issue: 123 / abc',
-      'Branch 123/abc already exist, checking out.',
+      'Get issue SE-123 info',
+      'Issue: SE-123 / abc',
+      'Branch SE-123/abc already exist, checking out.',
       'Done! Happy coding!',
     ]);
     console.log = log;
@@ -161,7 +161,7 @@ describe('tasks.js', () => {
     mockGit.getStatusPrint.mockImplementation(() => 'dirty text');
     mockGit.addAll.mockImplementation(() => true);
     mockGit.getCurrentBranchName.mockImplementation(() => 'SE-123/branch');
-    mockGit.getCommitTag.mockImplementation(() => '[123]');
+    mockGit.getCommitTag.mockImplementation(() => '[TAG]');
     mockGit.commit.mockImplementation(() => true);
     mockInput.choice.mockImplementation(() => 'a');
     mockInput.enter.mockImplementation(() => 'user enter commit msg');
@@ -172,7 +172,7 @@ describe('tasks.js', () => {
     expect(mockGit.getCurrentBranchName).toBeCalledWith();
     expect(mockGit.getCommitTag).toBeCalledWith();
     expect(mockGit.commit).toBeCalledWith(
-      '[123] [SE-123] user enter commit msg',
+      '[TAG] [SE-123] user enter commit msg',
     );
     expect(mockInput.choice).toBeCalledWith(
       'Please select an action',
@@ -188,7 +188,7 @@ describe('tasks.js', () => {
       '----- GIT STATUS BEGIN -----',
       'dirty text',
       '----- GIT STATUS END -----',
-      'Committing:[123] [SE-123] user enter commit msg',
+      'Committing:[TAG] [SE-123] user enter commit msg',
       'Awesome!',
     ]);
     console.log = log;
@@ -208,7 +208,7 @@ describe('tasks.js', () => {
     mockGit.getStatusPrint.mockImplementation(() => 'dirty text');
     mockGit.addAll.mockImplementation(() => true);
     mockGit.getCurrentBranchName.mockImplementation(() => 'SE-123/branch');
-    mockGit.getCommitTag.mockImplementation(() => '[123]');
+    mockGit.getCommitTag.mockImplementation(() => '[TAG]');
     mockGit.commit.mockImplementation(() => true);
     mockInput.choice.mockImplementation(() => 'a');
     mockInput.enter.mockImplementation(() => '');
@@ -218,7 +218,7 @@ describe('tasks.js', () => {
     expect(mockGit.addAll).toBeCalledWith();
     expect(mockGit.getCurrentBranchName).toBeCalledWith();
     expect(mockGit.getCommitTag).toBeCalledWith();
-    expect(mockGit.commit).toBeCalledWith('[123] [SE-123] 555');
+    expect(mockGit.commit).toBeCalledWith('[TAG] [SE-123] 555');
     expect(mockInput.choice).toBeCalledWith(
       'Please select an action',
       [
@@ -234,7 +234,7 @@ describe('tasks.js', () => {
       'dirty text',
       '----- GIT STATUS END -----',
       'Fetching issue title as commit message...',
-      'Committing:[123] [SE-123] 555',
+      'Committing:[TAG] [SE-123] 555',
       'Awesome!',
     ]);
     console.log = log;
@@ -248,16 +248,16 @@ describe('tasks.js', () => {
     mockGit.isRepoClean.mockImplementation(() => false);
     mockGit.addAll.mockImplementation(() => true);
     mockGit.getCurrentBranchName.mockImplementation(() => 'SE-123/branch');
-    mockGit.getCommitTag.mockImplementation(() => '[123]');
+    mockGit.getCommitTag.mockImplementation(() => '[TAG]');
     mockGit.commit.mockImplementation(() => true);
     await tasks.commit('fast message');
     expect(mockGit.isRepoClean).toBeCalledWith();
     expect(mockGit.addAll).toBeCalledWith();
     expect(mockGit.getCurrentBranchName).toBeCalledWith();
     expect(mockGit.getCommitTag).toBeCalledWith();
-    expect(mockGit.commit).toBeCalledWith('[123] [SE-123] fast message');
+    expect(mockGit.commit).toBeCalledWith('[TAG] [SE-123] fast message');
     expect(console.log.mock.calls.map(_ => _.join(''))).toEqual([
-      'Committing:[123] [SE-123] fast message',
+      'Committing:[TAG] [SE-123] fast message',
     ]);
     console.log = log;
   });

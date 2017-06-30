@@ -48,7 +48,7 @@ describe('jira.js', () => {
 
   it('should open browser via opn', () => {
     const opn = require('opn').mockImplementation(() => true);
-    jira.openIssue('1234');
+    jira.openIssue('SE-1234');
     expect(opn).toBeCalledWith('https://host/browse/SE-1234');
   });
 
