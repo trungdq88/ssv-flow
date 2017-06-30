@@ -73,20 +73,38 @@ describe('git.js', () => {
     return expect(p).rejects.toBe('error');
   });
 
-  it('checkoutBranch', () => {
+  it('createBranch', () => {
     const mockSimpleGit = require('simple-git').mockImplementation(() => ({
       checkoutLocalBranch: (name, callback) => callback(null, name),
     }));
-    const p = git.checkoutBranch('abc');
+    const p = git.createBranch('abc');
     expect(mockSimpleGit).toBeCalledWith('/DUMMY');
     return expect(p).resolves.toBe('abc');
   });
 
-  it('checkoutBranch error', () => {
+  it('createBranch error', () => {
     const mockSimpleGit = require('simple-git').mockImplementation(() => ({
       checkoutLocalBranch: (branchName, callback) => callback('error'),
     }));
-    const p = git.checkoutBranch('abc');
+    const p = git.createBranch('abc');
+    expect(mockSimpleGit).toBeCalledWith('/DUMMY');
+    return expect(p).rejects.toBe('error');
+  });
+
+  it('checkout', () => {
+    const mockSimpleGit = require('simple-git').mockImplementation(() => ({
+      checkout: (name, callback) => callback(null, name),
+    }));
+    const p = git.checkout('abc');
+    expect(mockSimpleGit).toBeCalledWith('/DUMMY');
+    return expect(p).resolves.toBe('abc');
+  });
+
+  it('checkout error', () => {
+    const mockSimpleGit = require('simple-git').mockImplementation(() => ({
+      checkout: (branchName, callback) => callback('error'),
+    }));
+    const p = git.checkout('abc');
     expect(mockSimpleGit).toBeCalledWith('/DUMMY');
     return expect(p).rejects.toBe('error');
   });

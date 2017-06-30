@@ -20,21 +20,23 @@ exports.start = async issueKey => {
   const issue = await jira.findIssue(issueKey);
   const branchName = issue.key + '/' + slug(issue.fields.summary);
 
+  console.log(`Issue: ${issue.key} / ${issue.fields.summary}`);
+
   if (!await git.isBranchLocalExists(branchName)) {
     console.log('Check out master');
-    await git.checkoutBranch('master');
+    await git.checkout('master');
 
     console.log('Pull master');
     await git.pull();
 
     console.log(`Creating branch ${branchName}`);
-    await git.checkoutBranch(branchName);
+    await git.createBranch(branchName);
 
     console.log(`Push branch ${branchName}`);
     await git.push(REMOTE_NAME, branchName);
   } else {
     console.log(`Branch ${branchName} already exist, checking out.`);
-    await git.checkoutBranch(branchName);
+    await git.checkout(branchName);
   }
 
   console.log('Done! Happy coding!');
@@ -156,7 +158,7 @@ exports.done = async username => {
 
   await cmd.runTests();
 
-  await git.checkoutBranch('master');
+  await git.checkout('master');
 
   await git.merge(currentBranchName, 'master');
 

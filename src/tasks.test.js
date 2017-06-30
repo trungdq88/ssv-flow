@@ -36,16 +36,16 @@ describe('tasks.js', () => {
       fields: {summary: 'abc'},
     }));
     mockGit.isRepoClean.mockImplementation(() => true);
-    mockGit.checkoutBranch.mockImplementation(() => true);
+    mockGit.checkout.mockImplementation(() => true);
     mockGit.isBranchLocalExists.mockImplementation(() => true);
 
     await tasks.start('issueKey');
     expect(mockGit.isRepoClean).toBeCalledWith();
     expect(mockJira.findIssue).toBeCalledWith('issueKey');
     expect(mockGit.isBranchLocalExists).toBeCalledWith('123/abc');
-    expect(mockGit.checkoutBranch).toBeCalledWith('123/abc');
     expect(console.log.mock.calls.map(_ => _.join(''))).toEqual([
       'Get issue issueKey info',
+      'Issue: 123 / abc',
       'Branch 123/abc already exist, checking out.',
       'Done! Happy coding!',
     ]);
@@ -65,7 +65,8 @@ describe('tasks.js', () => {
       fields: {summary: 'abc'},
     }));
     mockGit.isRepoClean.mockImplementation(() => true);
-    mockGit.checkoutBranch.mockImplementation(() => true);
+    mockGit.createBranch.mockImplementation(() => true);
+    mockGit.checkout.mockImplementation(() => true);
     mockGit.isBranchLocalExists.mockImplementation(() => false);
     mockGit.pull.mockImplementation(() => true);
     mockGit.push.mockImplementation(() => true);
@@ -74,12 +75,13 @@ describe('tasks.js', () => {
     expect(mockGit.isRepoClean).toBeCalledWith();
     expect(mockJira.findIssue).toBeCalledWith('issueKey');
     expect(mockGit.isBranchLocalExists).toBeCalledWith('123/abc');
-    expect(mockGit.checkoutBranch).toBeCalledWith('master');
+    expect(mockGit.checkout).toBeCalledWith('master');
     expect(mockGit.pull).toBeCalledWith();
-    expect(mockGit.checkoutBranch).toBeCalledWith('123/abc');
+    expect(mockGit.createBranch).toBeCalledWith('123/abc');
     expect(mockGit.push).toBeCalledWith('remote', '123/abc');
     expect(console.log.mock.calls.map(_ => _.join(''))).toEqual([
       'Get issue issueKey info',
+      'Issue: 123 / abc',
       'Check out master',
       'Pull master',
       'Creating branch 123/abc',
@@ -119,7 +121,8 @@ describe('tasks.js', () => {
     }));
     mockInput.ask.mockImplementation(() => true);
     mockGit.isRepoClean.mockImplementation(() => true);
-    mockGit.checkoutBranch.mockImplementation(() => true);
+    mockGit.createBranch.mockImplementation(() => true);
+    mockGit.checkout.mockImplementation(() => true);
     mockGit.isBranchLocalExists.mockImplementation(() => true);
     await tasks.createIssue('title');
     expect(mockJira.createIssue).toBeCalledWith('title');
@@ -129,6 +132,7 @@ describe('tasks.js', () => {
     expect(console.log.mock.calls.map(_ => _.join(''))).toEqual([
       'Creating issue title',
       'Get issue 123 info',
+      'Issue: 123 / abc',
       'Branch 123/abc already exist, checking out.',
       'Done! Happy coding!',
     ]);
@@ -355,7 +359,7 @@ describe('tasks.js', () => {
     mockGit.isRepoClean.mockImplementationOnce(() => true);
     mockGit.merge.mockImplementation(() => true);
     mockCmd.runTests.mockImplementation(() => true);
-    mockGit.checkoutBranch.mockImplementation(() => true);
+    mockGit.checkout.mockImplementation(() => true);
     mockCmd.deploy.mockImplementation(() => true);
     mockJira.moveIssue.mockImplementation(() => true);
     mockGit.getLatestTag.mockImplementation(() => 'v1.2.3');
@@ -368,7 +372,7 @@ describe('tasks.js', () => {
     expect(mockGit.merge).toBeCalledWith('SE-123/abc', 'master');
     expect(mockGit.merge).toBeCalledWith('master', 'SE-123/abc');
     expect(mockCmd.runTests).toBeCalledWith();
-    expect(mockGit.checkoutBranch).toBeCalledWith('master');
+    expect(mockGit.checkout).toBeCalledWith('master');
     expect(mockCmd.deploy).toBeCalledWith();
     expect(mockJira.moveIssue).toBeCalledWith('SE-123', 'username');
     expect(mockGit.getLatestTag).toBeCalledWith();

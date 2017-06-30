@@ -44,9 +44,21 @@ exports.pull = () => {
   });
 };
 
-exports.checkoutBranch = branchName => {
+exports.createBranch = branchName => {
   return new Promise((resolve, reject) => {
     SimpleGit(pathToRepo).checkoutLocalBranch(branchName, (err, success) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      resolve(success);
+    });
+  });
+};
+
+exports.checkout = branchName => {
+  return new Promise((resolve, reject) => {
+    SimpleGit(pathToRepo).checkout(branchName, (err, success) => {
       if (err) {
         reject(err);
         return;
