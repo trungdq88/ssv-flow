@@ -43,6 +43,13 @@ program
     tasks.done(user);
   });
 
+program
+  .command('move <issueKey> <username>')
+  .description('Move an issue to QA and assign to a user')
+  .action((issueKey, username) => {
+    tasks.moveIssue(issueKey, username);
+  });
+
 program.parse(process.argv);
 
 if (program.args.length === 0) {
