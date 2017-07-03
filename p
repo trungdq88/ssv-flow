@@ -1,5 +1,9 @@
 #!/usr/bin/env node
 
+process.on('unhandledRejection', e => {
+  throw e;
+});
+
 const pkg = require('./package.json');
 const program = require('commander');
 
@@ -41,6 +45,13 @@ program
   .description('Complete an issue')
   .action(user => {
     tasks.done(user);
+  });
+
+program
+  .command('deploy')
+  .description('Deploy all remaining issues and move JIRA ticket to QA')
+  .action(() => {
+    tasks.deploy();
   });
 
 program

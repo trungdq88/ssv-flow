@@ -12,6 +12,7 @@ const {
   ACTIVE_BOARD,
   COMPONENT_HQ_FRONTEND,
   ISSUE_TRANSITIONS,
+  ISSUE_TRANSITIONS_READY_TO_DEPLOY,
   PROJECT_CODE,
 } = config;
 
@@ -23,6 +24,36 @@ const jiraApi = new JiraApi(
   config.password,
   'latest',
 );
+
+const moveIssue = async (transitionList, issueKey) => {
+  for (let i = 0; i < transitionList.length; i++) {
+    const transitionName = transitionList[i];
+    const availableTransitions = (await jiraApi.listTransitions(issueKey))
+      .transitions;
+    const nextTransition = availableTransitions.find(
+      transition =>
+        transition.name.toLowerCase() === transitionName.toLowerCase(),
+    );
+
+    if (!nextTransition) {
+      console.log(
+        `Transition "${transitionName}" not found in available` +
+          ` transitions of issue ${issueKey}:\n` +
+          `${availableTransitions.map(_ => _.name).join('\n')}`,
+      );
+      console.log('Skip to next transition');
+      continue;
+    }
+
+    console.log(`Moving ${issueKey} to ${nextTransition.name}...`);
+    await jiraApi.transitionIssue(issueKey, {
+      transition: nextTransition,
+    });
+  }
+
+  console.log(`Issue transition complete.`);
+  return true;
+};
 
 exports.openIssue = issueKey => {
   opn(config.protocol + '://' + config.host + '/browse/' + issueKey);
@@ -73,36 +104,6 @@ exports.findIssue = issueKey => {
   return jiraApi.findIssue(issueKey);
 };
 
-exports.moveIssue = async (issueKey, username) => {
-  for (let i = 0; i < ISSUE_TRANSITIONS.length; i++) {
-    const transitionName = ISSUE_TRANSITIONS[i];
-    const availableTransitions = (await jiraApi.listTransitions(issueKey))
-      .transitions;
-    const nextTransition = availableTransitions.find(
-      transition =>
-        transition.name.toLowerCase() === transitionName.toLowerCase(),
-    );
-
-    if (!nextTransition) {
-      console.log(
-        `Transition "${transitionName}" not found in available` +
-          ` transitions of issue ${issueKey}:\n` +
-          `${availableTransitions.map(_ => _.name).join('\n')}`,
-      );
-      console.log('Skip to next transition');
-      continue;
-    }
-
-    console.log(`Moving ${issueKey} to ${nextTransition.name}...`);
-    await jiraApi.transitionIssue(issueKey, {
-      transition: nextTransition,
-    });
-  }
-
-  console.log(`Issue transition complete.`);
-  return true;
-};
-
 exports.addComment = (issueKey, comment) => {
   return jiraApi.addComment(issueKey, comment);
 };
@@ -110,3 +111,8 @@ exports.addComment = (issueKey, comment) => {
 exports.assignIssue = (issueKey, username) => {
   return jiraApi.assignIssue(issueKey, username);
 };
+
+exports.moveIssue = issueKey => moveIssue(ISSUE_TRANSITIONS, issueKey);
+
+exports.moveIssueToReadyToDeploy = issueKey =>
+  moveIssue(ISSUE_TRANSITIONS_READY_TO_DEPLOY, issueKey);

@@ -5,6 +5,7 @@ const git = require('./git.js');
 const input = require('./input.js');
 const cmd = require('./cmd.js');
 const slug = require('./utils/slug.js');
+const changeLog = require('./utils/change-log.js');
 
 const {PROJECT_CODE, REMOTE_NAME} = config;
 
@@ -169,17 +170,41 @@ exports.done = async username => {
 
   await git.merge(currentBranchName, 'master');
 
-  await cmd.deploy();
+  await git.push(REMOTE_NAME, 'master');
 
-  await jira.moveIssue(issueKey, username);
+  await jira.moveIssueToReadyToDeploy(issueKey);
 
-  const latestTag = await git.getLatestTag();
-
-  await jira.addComment(issueKey, `Done at ${latestTag}.`);
-
-  await jira.assignIssue(issueKey, username);
-
+  // await cmd.deploy();
+  //
+  // await jira.moveIssue(issueKey, username);
+  //
+  // const latestTag = await git.getLatestTag();
+  //
+  // await jira.addComment(issueKey, `Done at ${latestTag}.`);
+  //
+  // await jira.assignIssue(issueKey, username);
+  //
   console.log('Done');
+};
+
+exports.deploy = async () => {
+  // const currentBranchName = await git.getCurrentBranchName();
+  // const issueKey = currentBranchName.split('/')[0];
+  // if (currentBranchName !== 'master') {
+  //   console.log('You can only to run this command on master');
+  //   return;
+  // }
+  //
+  // if (!await git.isRepoClean()) {
+  //   console.log('Repo is not clean!');
+  //   return;
+  // }
+
+  const logs = await git.getLogSinceLastTag('master');
+  const changeLogText = await changeLog(logs, PROJECT_CODE, jira.findIssue);
+
+  console.log(changeLogText);
+
 };
 
 exports.moveIssue = async (issueKey, username) => {

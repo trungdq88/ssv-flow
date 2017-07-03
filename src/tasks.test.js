@@ -347,7 +347,7 @@ describe('tasks.js', () => {
     console.log = log;
   });
 
-  it('done conflict', async () => {
+  it('done happy case', async () => {
     const log = console.log;
     console.log = jest.fn();
     const mockGit = require('./git.js');
@@ -360,11 +360,7 @@ describe('tasks.js', () => {
     mockGit.merge.mockImplementation(() => true);
     mockCmd.runTests.mockImplementation(() => true);
     mockGit.checkout.mockImplementation(() => true);
-    mockCmd.deploy.mockImplementation(() => true);
-    mockJira.moveIssue.mockImplementation(() => true);
-    mockGit.getLatestTag.mockImplementation(() => 'v1.2.3');
-    mockJira.addComment.mockImplementation(() => true);
-    mockJira.assignIssue.mockImplementation(() => true);
+    mockJira.moveIssueToReadyToDeploy.mockImplementation(() => true);
     await tasks.done('username');
     expect(mockGit.getCurrentBranchName).toBeCalledWith();
     expect(mockGit.isRepoClean).toBeCalledWith();
@@ -373,11 +369,7 @@ describe('tasks.js', () => {
     expect(mockGit.merge).toBeCalledWith('master', 'SE-123/abc');
     expect(mockCmd.runTests).toBeCalledWith();
     expect(mockGit.checkout).toBeCalledWith('master');
-    expect(mockCmd.deploy).toBeCalledWith();
-    expect(mockJira.moveIssue).toBeCalledWith('SE-123', 'username');
-    expect(mockGit.getLatestTag).toBeCalledWith();
-    expect(mockJira.addComment).toBeCalledWith('SE-123', 'Done at v1.2.3.');
-    expect(mockJira.assignIssue).toBeCalledWith('SE-123', 'username');
+    expect(mockJira.moveIssueToReadyToDeploy).toBeCalledWith('SE-123');
     expect(console.log.mock.calls.map(_ => _.join(''))).toEqual(['Done']);
     console.log = log;
   });

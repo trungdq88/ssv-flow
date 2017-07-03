@@ -1,3 +1,4 @@
+// @format
 const path = require('path');
 const SimpleGit = require('simple-git');
 require('colors');
@@ -171,6 +172,27 @@ exports.getLatestTag = () => {
         return;
       }
       resolve(tags.latest);
+    });
+  });
+};
+
+exports.getLogSinceLastTag = branch => {
+  return new Promise((resolve, reject) => {
+    SimpleGit(pathToRepo).log([branch], (err, log) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      resolve(
+        log.all
+          .slice(
+            0,
+            log.all.findIndex(line =>
+              /\(tag: v\d+\.\d+\.\d+\)$/.test(line.message),
+            ),
+          )
+          .map(line => line.message),
+      );
     });
   });
 };

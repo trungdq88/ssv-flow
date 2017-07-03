@@ -68,9 +68,9 @@ Example `config.js`:
 ### `p deploy`
   - Only allow run in master
   - Check repo clean
-  - Check for pending issues
-  - Bump version
-  - Push all branches & tags to all remotes
+  - Check for pending issues not empty
+  - Allow enter usernames for issues
+  - Bump version && push all branches & tags to all remotes
   - Move all pending issues to Deployed
   - Comment version number
   - Assign issue to coresponding usernames
