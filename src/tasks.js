@@ -230,6 +230,8 @@ exports.deploy = async () => {
     ),
   );
 
+  console.log('Updating release note...');
+
   console.log('Done.');
 };
 
