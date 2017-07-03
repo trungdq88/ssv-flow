@@ -6,7 +6,7 @@ require('colors');
 const config = require('./config.js');
 const commitTag = require('./utils/commit-tag.js');
 
-const pathToRepo = path.resolve(config.REPO_PATH);
+const pathToRepo = path.resolve(config.REPO_PATH || '');
 
 exports.getCommitTag = () => {
   return new Promise((resolve, reject) => {
