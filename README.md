@@ -62,11 +62,18 @@ Example `config.js`:
   - Run tests
   - Checkout master
   - Merge back from branch
+  - Push master to remotes
+  - Move issues to ready to deploy
+
+### `p deploy`
+  - Only allow run in master
+  - Check repo clean
+  - Check for pending issues
   - Bump version
   - Push all branches & tags to all remotes
-  - Move issue
+  - Move all pending issues to Deployed
   - Comment version number
-  - Assign issue to username
+  - Assign issue to coresponding usernames
 
 ### `p open (:issueNumber)`
 
