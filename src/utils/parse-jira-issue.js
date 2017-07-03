@@ -1,6 +1,6 @@
 module.exports = (text, jiraTaskPrefix) => {
   const jiraRegExp = new RegExp(
-    '^- \\[(' + jiraTaskPrefix + '-\\d+)\\].*?\\(@(.*?)\\)$',
+    '^-\\s?[\\[\\s](' + jiraTaskPrefix + '-\\d+)[\\]\\s].*?\\(@(.*?)\\)$',
   );
   return text
     .split('\n')
