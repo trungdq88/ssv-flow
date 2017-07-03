@@ -263,22 +263,15 @@ exports.generateReleaseNotes = async (issueKey, username) => {
     `# Frontend Apps Release Notes`,
     ...(await Promise.all(
       tags.map(tag => getTagLogs(tag.tag)).map(log =>
-        changeLog(
-          log,
-          PROJECT_CODE,
-          issueKey => {
-            console.log(`Fetching ${issueKey}...`);
-            return jira.findIssue(issueKey).catch(_ => ({
-              fields: {
-                summary: '(Issue not found)',
-                creator: {name: 'error'},
-              },
-            }));
-          },
-          {
-            jiraIssueOnly: true,
-          },
-        ),
+        changeLog(log, PROJECT_CODE, issueKey => {
+          console.log(`Fetching ${issueKey}...`);
+          return jira.findIssue(issueKey).catch(_ => ({
+            fields: {
+              summary: '(Issue not found)',
+              creator: {name: 'error'},
+            },
+          }));
+        }),
       ),
     )).map((notes, index) =>
       [

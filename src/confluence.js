@@ -42,6 +42,7 @@ exports.editPage = (pageTitle, content) =>
       content,
       (err, success) => {
         if (err) {
+          console.log(err);
           reject(err);
           return;
         }
@@ -49,5 +50,3 @@ exports.editPage = (pageTitle, content) =>
       },
     );
   });
-
-exports.editPage('Release Note - Frontend Apps', 'hehehe').then(_ => console.log(_));

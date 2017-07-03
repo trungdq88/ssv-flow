@@ -32,7 +32,7 @@ module.exports = async (
 
   if (jiraIssues.length) {
     if (sectionCount >= 2) {
-      output = output.concat([`JIRA issues:`]);
+      output = output.concat([`### JIRA issues:`]);
     }
     output = output.concat(
       jiraIssues.map(_ => `- [${_.key}] ${_.title} (@${_.creator})`),
@@ -41,7 +41,7 @@ module.exports = async (
 
   if (others.length) {
     if (sectionCount >= 2) {
-      output = output.concat([``, `Others:`]);
+      output = output.concat([``, `### Others:`]);
     }
     output = output.concat(others.map(_ => `- ${_}`));
   }

@@ -2,3 +2,4 @@ env.json
 node_modules
 coverage/
 .DS_Store
+src/test.txt
