@@ -5,7 +5,9 @@ module.exports = async (
   getJiraIssueInfo,
   {jiraIssueOnly = false} = {},
 ) => {
-  const jiraRegExp = new RegExp('[\\[\\s](' + jiraTaskPrefix + '-\\d+)[\\]\\s]');
+  const jiraRegExp = new RegExp(
+    '[\\[\\s](' + jiraTaskPrefix + '-\\d+)[\\]\\s]',
+  );
   const issueKeys = Array.from(
     new Set(
       logs

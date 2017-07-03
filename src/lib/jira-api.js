@@ -101,7 +101,7 @@ const JiraApi = (exports.JiraApi = function(
         }
 
         if (response.statusCode === 404) {
-          reject('Invalid issue number.');
+          reject('Invalid issue number. ' + issueNumber);
           return;
         }
 

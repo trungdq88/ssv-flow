@@ -268,7 +268,12 @@ exports.generateReleaseNotes = async (issueKey, username) => {
           PROJECT_CODE,
           issueKey => {
             console.log(`Fetching ${issueKey}...`);
-            return jira.findIssue(issueKey);
+            return jira.findIssue(issueKey).catch(_ => ({
+              fields: {
+                summary: '(Issue not found)',
+                creator: {name: 'error'},
+              },
+            }));
           },
           {
             jiraIssueOnly: true,
