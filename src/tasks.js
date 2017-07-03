@@ -236,3 +236,45 @@ exports.deploy = async () => {
 exports.moveIssue = async (issueKey, username) => {
   return jira.moveIssue(getFullIssueKey(issueKey), username);
 };
+
+exports.generateReleaseNotes = async (issueKey, username) => {
+  const tagRegExp = new RegExp('\\(tag: (v\\d+\\.\\d+\\.\\d+)\\)$');
+  const fullLogs = await git.getLog('master');
+  const tagLogs = [];
+  let tagName = 'future';
+  let tagDate = 'future';
+  for (let i = 0; i < fullLogs.length; i++) {
+    const message = fullLogs[i].message;
+    if (tagRegExp.test(message)) {
+      tagName = tagRegExp.exec(message)[1];
+      tagDate = fullLogs[i].date;
+    } else {
+      tagLogs.push({tag: tagName, message, date: tagDate});
+    }
+  }
+  const tags = Array.from(
+    new Set(tagLogs.map(_ => _.tag)),
+  ).map(tag => tagLogs.find(_ => _.tag === tag));
+
+  const getTagLogs = tag =>
+    tagLogs.filter(_ => _.tag === tag).map(_ => _.message);
+
+  const releaseNotes = [
+    `# Frontend Apps Release Notes`,
+    ...(await Promise.all(
+      tags.map(tag => getTagLogs(tag.tag)).map(log =>
+        changeLog(log, PROJECT_CODE, issueKey => {
+          console.log(`Fetching ${issueKey}...`);
+          return jira.findIssue(issueKey);
+        }),
+      ),
+    )).map((notes, index) =>
+      [
+        ``,
+        `## Release ${tags[index].tag} (${tags[index].date}):`,
+        notes.join('\n'),
+      ].join('\n'),
+    ),
+  ].join('\n');
+  console.log(releaseNotes);
+};

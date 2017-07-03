@@ -196,3 +196,15 @@ exports.getLogSinceLastTag = branch => {
     });
   });
 };
+
+exports.getLog = branch => {
+  return new Promise((resolve, reject) => {
+    SimpleGit(pathToRepo).log([branch], (err, log) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      resolve(log.all);
+    });
+  });
+};

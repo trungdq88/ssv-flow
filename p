@@ -61,6 +61,13 @@ program
     tasks.moveIssue(issueKey, username);
   });
 
+program
+  .command('generate-release-notes')
+  .description('Generate release notes')
+  .action((issueKey, username) => {
+    tasks.generateReleaseNotes(issueKey, username);
+  });
+
 program.parse(process.argv);
 
 if (program.args.length === 0) {
