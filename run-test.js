@@ -1,6 +1,9 @@
 const jest = require('jest');
 
-jest.run([
-  '--watchAll',
-  '--verbose',
-]);
+const args = [];
+
+if (!process.env.CI) {
+  args.push('--watchAll');
+}
+
+jest.run(args);
