@@ -13,6 +13,7 @@ const {
   COMPONENT_HQ_FRONTEND,
   ISSUE_TRANSITIONS,
   ISSUE_TRANSITIONS_READY_TO_DEPLOY,
+  ISSUE_TRANSITIONS_DEPLOYED,
   PROJECT_CODE,
 } = config;
 
@@ -116,3 +117,6 @@ exports.moveIssue = issueKey => moveIssue(ISSUE_TRANSITIONS, issueKey);
 
 exports.moveIssueToReadyToDeploy = issueKey =>
   moveIssue(ISSUE_TRANSITIONS_READY_TO_DEPLOY, issueKey);
+
+exports.moveIssueToDeployed = issueKey =>
+  moveIssue(ISSUE_TRANSITIONS_DEPLOYED, issueKey);

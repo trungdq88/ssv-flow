@@ -6,6 +6,7 @@ const input = require('./input.js');
 const cmd = require('./cmd.js');
 const slug = require('./utils/slug.js');
 const changeLog = require('./utils/change-log.js');
+const parseJiraIssue = require('./utils/parse-jira-issue.js');
 
 const {PROJECT_CODE, REMOTE_NAME} = config;
 
@@ -174,37 +175,62 @@ exports.done = async username => {
 
   await jira.moveIssueToReadyToDeploy(issueKey);
 
-  // await cmd.deploy();
-  //
-  // await jira.moveIssue(issueKey, username);
-  //
-  // const latestTag = await git.getLatestTag();
-  //
-  // await jira.addComment(issueKey, `Done at ${latestTag}.`);
-  //
-  // await jira.assignIssue(issueKey, username);
-  //
   console.log('Done');
 };
 
 exports.deploy = async () => {
-  // const currentBranchName = await git.getCurrentBranchName();
-  // const issueKey = currentBranchName.split('/')[0];
-  // if (currentBranchName !== 'master') {
-  //   console.log('You can only to run this command on master');
-  //   return;
-  // }
-  //
-  // if (!await git.isRepoClean()) {
-  //   console.log('Repo is not clean!');
-  //   return;
-  // }
+  const currentBranchName = await git.getCurrentBranchName();
+  const issueKey = currentBranchName.split('/')[0];
+  if (currentBranchName !== 'master') {
+    console.log('You can only to run this command on master');
+    return;
+  }
 
+  if (!await git.isRepoClean()) {
+    console.log('Repo is not clean!');
+    return;
+  }
+
+  console.log('Fetching issues info from JIRA...');
   const logs = await git.getLogSinceLastTag('master');
-  const changeLogText = await changeLog(logs, PROJECT_CODE, jira.findIssue);
+  const changeLogText = await changeLog(logs, PROJECT_CODE, issueKey => {
+    console.log(`Fetching ${issueKey}...`);
+    return jira.findIssue(issueKey);
+  });
+  const userChangeLog = await input.enter(changeLogText.join('\n'));
 
-  console.log(changeLogText);
+  if (!userChangeLog) {
+    console.log('Cancelled');
+    return;
+  }
 
+  console.log(userChangeLog);
+
+  console.log('Creating new tag & trigger deploy...');
+  await cmd.deploy();
+
+  const pendingIssues = parseJiraIssue(userChangeLog, PROJECT_CODE);
+  const latestTag = await git.getLatestTag();
+
+  console.log(
+    [`Pending issues: ${pendingIssues.length} issue(s)`]
+      .concat(pendingIssues.map(_ => ` - ${_.issueKey} (${_.username})`))
+      .join('\n'),
+  );
+
+  console.log(`Moving && assigning ${pendingIssues.length} issue(s)...`);
+  await Promise.all(
+    pendingIssues.map(({issueKey, username}) =>
+      (async () => {
+        await jira.moveIssueToDeployed(issueKey);
+        await jira.addComment(issueKey, `Done at ${latestTag}.`);
+        await jira.assignIssue(issueKey, username);
+        console.log(`Issue ${issueKey}... Done.`);
+      })(),
+    ),
+  );
+
+  console.log('Done.');
 };
 
 exports.moveIssue = async (issueKey, username) => {

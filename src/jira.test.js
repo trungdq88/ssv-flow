@@ -6,6 +6,7 @@ require('./config.js').host = 'host';
 require('./config.js').PROJECT_CODE = 'SE';
 require('./config.js').ISSUE_TRANSITIONS = ['a', 'b', 'c'];
 require('./config.js').ISSUE_TRANSITIONS_READY_TO_DEPLOY = ['a', 'b'];
+require('./config.js').ISSUE_TRANSITIONS_DEPLOYED = ['c'];
 jest.mock('opn');
 jest.mock('./lib/jira-api.js');
 require('./lib/jira-api.js').JiraApi.mockImplementation(() => ({
@@ -111,6 +112,17 @@ describe('jira.js', () => {
     expect(console.log.mock.calls.map(_ => _.join(''))).toEqual([
       'Moving issueKey to a...',
       'Moving issueKey to b...',
+      'Issue transition complete.',
+    ]);
+    console.log = log;
+  });
+
+  it('move issue to deployed', async () => {
+    const log = console.log;
+    console.log = jest.fn();
+    await jira.moveIssueToDeployed('issueKey');
+    expect(console.log.mock.calls.map(_ => _.join(''))).toEqual([
+      'Moving issueKey to c...',
       'Issue transition complete.',
     ]);
     console.log = log;

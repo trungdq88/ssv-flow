@@ -21,7 +21,7 @@ module.exports = async (logs, jiraTaskPrefix, getJiraIssueInfo) => {
   if (jiraIssues.length) sectionCount++;
   if (others.length) sectionCount++;
 
-  let output = ['Changes:', ``];
+  let output = [`Changes:`, ``];
 
   if (jiraIssues.length) {
     if (sectionCount >= 2) {

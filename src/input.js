@@ -31,6 +31,9 @@ exports.choice = (message, options, defaultValue) => {
 exports.enter = defaultMessage => {
   return new Promise((resolve, reject) => {
     tmp.file((err, filePath) => {
+      if (defaultMessage) {
+        fs.writeFileSync(filePath, defaultMessage);
+      }
       const spawn = require('child_process').spawn;
       const p = spawn('nvim', [filePath], {stdio: 'inherit'});
       p.on('exit', () => {

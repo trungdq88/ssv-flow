@@ -373,4 +373,87 @@ describe('tasks.js', () => {
     expect(console.log.mock.calls.map(_ => _.join(''))).toEqual(['Done']);
     console.log = log;
   });
+
+  it('deploy happy case', async () => {
+    const log = console.log;
+    console.log = jest.fn();
+    const mockGit = require('./git.js');
+    const mockInput = require('./input.js');
+    const mockCmd = require('./cmd.js');
+    const mockJira = require('./jira.js');
+    mockGit.getCurrentBranchName.mockImplementation(() => 'master');
+    mockGit.isRepoClean.mockImplementation(() => true);
+    mockGit.getLogSinceLastTag.mockImplementation(() => [
+      '[HQ] [SE-2449] Optimize file read',
+      '[HQ] [SE-2449] Test screenshot',
+      '[HQ] [SE-2449] Read meta',
+      'Add test-screenshot',
+      '[SUP] [SE-2441] Analytics portal',
+      '[SUP] [SE-2441] Submodule',
+      '[SUP] [SE-2441] Change env vars',
+      '[LOG/CDC] [SE-2440] Set timezone',
+      '[LOG/CDC/SUP] [SE-2440] Bitbucket pipeline',
+      '[CONFIG] [master] Use Bitbucket pipeline',
+      'bitbucket-pipelines.yml created online with Bitbucket',
+    ]);
+    mockGit.checkout.mockImplementation(() => true);
+    mockJira.findIssue.mockImplementation(issueKey => ({
+      fields: {
+        summary: 'issue ' + issueKey,
+        creator: {name: 'name-' + issueKey},
+      },
+    }));
+    mockInput.enter.mockImplementation(text => text + 'enter');
+    mockCmd.deploy.mockImplementation(() => true);
+    mockGit.getLatestTag.mockImplementation(() => 'v1.2.3');
+    mockJira.moveIssueToDeployed.mockImplementation(() => true);
+    mockJira.addComment.mockImplementation(() => true);
+    mockJira.assignIssue.mockImplementation(() => true);
+    await tasks.deploy('username');
+    expect(console.log.mock.calls.map(_ => _.join(''))).toEqual([
+      'Fetching issues info from JIRA...',
+      'Fetching SE-2449...',
+      'Fetching SE-2441...',
+      'Fetching SE-2440...',
+      [
+        `Changes:`,
+        ``,
+        `JIRA issues:`,
+        `- [SE-2449] issue SE-2449 (@name-SE-2449)`,
+        `- [SE-2441] issue SE-2441 (@name-SE-2441)`,
+        `- [SE-2440] issue SE-2440 (@name-SE-2440)`,
+        ``,
+        `Others:`,
+        `- Add test-screenshot`,
+        `- [CONFIG] [master] Use Bitbucket pipeline`,
+        `- bitbucket-pipelines.yml created online with Bitbucketenter`,
+      ].join('\n'),
+      'Creating new tag & trigger deploy...',
+      [
+        'Pending issues: 3 issue(s)',
+        ' - SE-2449 (name-SE-2449)',
+        ' - SE-2441 (name-SE-2441)',
+        ' - SE-2440 (name-SE-2440)',
+      ].join('\n'),
+      'Moving && assigning 3 issue(s)...',
+      'Issue SE-2449... Done.',
+      'Issue SE-2441... Done.',
+      'Issue SE-2440... Done.',
+      'Done.',
+    ]);
+    console.log = log;
+  });
+
+  it('deploy only run on master', async () => {
+    const log = console.log;
+    console.log = jest.fn();
+    const mockGit = require('./git.js');
+    const mockInput = require('./input.js');
+    mockGit.getCurrentBranchName.mockImplementation(() => 'abc');
+    await tasks.deploy();
+    expect(console.log.mock.calls.map(_ => _.join(''))).toEqual([
+      'You can only to run this command on master',
+    ]);
+    console.log = log;
+  });
 });
