@@ -252,9 +252,9 @@ exports.generateReleaseNotes = async (issueKey, username) => {
       tagLogs.push({tag: tagName, message, date: tagDate});
     }
   }
-  const tags = Array.from(
-    new Set(tagLogs.map(_ => _.tag)),
-  ).map(tag => tagLogs.find(_ => _.tag === tag));
+  const tags = Array.from(new Set(tagLogs.map(_ => _.tag))).map(tag =>
+    tagLogs.find(_ => _.tag === tag),
+  );
 
   const getTagLogs = tag =>
     tagLogs.filter(_ => _.tag === tag).map(_ => _.message);
@@ -263,10 +263,17 @@ exports.generateReleaseNotes = async (issueKey, username) => {
     `# Frontend Apps Release Notes`,
     ...(await Promise.all(
       tags.map(tag => getTagLogs(tag.tag)).map(log =>
-        changeLog(log, PROJECT_CODE, issueKey => {
-          console.log(`Fetching ${issueKey}...`);
-          return jira.findIssue(issueKey);
-        }),
+        changeLog(
+          log,
+          PROJECT_CODE,
+          issueKey => {
+            console.log(`Fetching ${issueKey}...`);
+            return jira.findIssue(issueKey);
+          },
+          {
+            jiraIssueOnly: true,
+          },
+        ),
       ),
     )).map((notes, index) =>
       [

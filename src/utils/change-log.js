@@ -1,5 +1,10 @@
 // @format
-module.exports = async (logs, jiraTaskPrefix, getJiraIssueInfo) => {
+module.exports = async (
+  logs,
+  jiraTaskPrefix,
+  getJiraIssueInfo,
+  {jiraIssueOnly = false} = {},
+) => {
   const jiraRegExp = new RegExp('\\[(' + jiraTaskPrefix + '-\\d+)\\]');
   const issueKeys = Array.from(
     new Set(
@@ -15,7 +20,7 @@ module.exports = async (logs, jiraTaskPrefix, getJiraIssueInfo) => {
     title: issueInfo.fields.summary,
     creator: issueInfo.fields.creator.name,
   }));
-  const others = logs.filter(log => !jiraRegExp.test(log));
+  const others = jiraIssueOnly ? [] : logs.filter(log => !jiraRegExp.test(log));
 
   let sectionCount = 0;
   if (jiraIssues.length) sectionCount++;
