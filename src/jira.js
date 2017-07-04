@@ -14,6 +14,7 @@ const {
   ISSUE_TRANSITIONS,
   ISSUE_TRANSITIONS_READY_TO_DEPLOY,
   ISSUE_TRANSITIONS_DEPLOYED,
+  ISSUE_TRANSITIONS_START_PROGRESS,
   PROJECT_CODE,
 } = config;
 
@@ -114,6 +115,9 @@ exports.assignIssue = (issueKey, username) => {
 };
 
 exports.moveIssue = issueKey => moveIssue(ISSUE_TRANSITIONS, issueKey);
+
+exports.moveIssueToStartProgress = issueKey =>
+  moveIssue(ISSUE_TRANSITIONS_START_PROGRESS, issueKey);
 
 exports.moveIssueToReadyToDeploy = issueKey =>
   moveIssue(ISSUE_TRANSITIONS_READY_TO_DEPLOY, issueKey);

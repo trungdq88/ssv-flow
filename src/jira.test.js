@@ -5,8 +5,9 @@ require('./config.js').protocol = 'https';
 require('./config.js').host = 'host';
 require('./config.js').PROJECT_CODE = 'SE';
 require('./config.js').ISSUE_TRANSITIONS = ['a', 'b', 'c'];
-require('./config.js').ISSUE_TRANSITIONS_READY_TO_DEPLOY = ['a', 'b'];
+require('./config.js').ISSUE_TRANSITIONS_READY_TO_DEPLOY = ['b'];
 require('./config.js').ISSUE_TRANSITIONS_DEPLOYED = ['c'];
+require('./config.js').ISSUE_TRANSITIONS_START_PROGRESS = ['a'];
 jest.mock('opn');
 jest.mock('./lib/jira-api.js');
 require('./lib/jira-api.js').JiraApi.mockImplementation(() => ({
@@ -105,12 +106,22 @@ describe('jira.js', () => {
     console.log = log;
   });
 
+  it('move issue to start progress', async () => {
+    const log = console.log;
+    console.log = jest.fn();
+    await jira.moveIssueToStartProgress('issueKey');
+    expect(console.log.mock.calls.map(_ => _.join(''))).toEqual([
+      'Moving issueKey to a...',
+      'Issue transition complete.',
+    ]);
+    console.log = log;
+  });
+
   it('move issue to ready to deployed', async () => {
     const log = console.log;
     console.log = jest.fn();
     await jira.moveIssueToReadyToDeploy('issueKey');
     expect(console.log.mock.calls.map(_ => _.join(''))).toEqual([
-      'Moving issueKey to a...',
       'Moving issueKey to b...',
       'Issue transition complete.',
     ]);

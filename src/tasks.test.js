@@ -34,6 +34,7 @@ describe('tasks.js', () => {
     const mockJira = require('./jira.js');
     const mockSlug = require('./utils/slug.js');
     mockSlug.mockImplementation(_ => _);
+    mockJira.moveIssueToStartProgress.mockImplementation(() => true);
     mockJira.findIssue.mockImplementation(() => ({
       key: 'SE-123',
       fields: {summary: 'abc'},
@@ -46,10 +47,12 @@ describe('tasks.js', () => {
     expect(mockGit.isRepoClean).toBeCalledWith();
     expect(mockJira.findIssue).toBeCalledWith('SE-issueKey');
     expect(mockGit.isBranchLocalExists).toBeCalledWith('SE-123/abc');
+    expect(mockJira.moveIssueToStartProgress).toBeCalledWith('SE-issueKey');
     expect(console.log.mock.calls.map(_ => _.join(''))).toEqual([
       'Get issue SE-issueKey info',
       'Issue: SE-123 / abc',
       'Branch SE-123/abc already exist, checking out.',
+      'Move issue to Start Progress...',
       'Done! Happy coding!',
     ]);
     console.log = log;
@@ -73,6 +76,7 @@ describe('tasks.js', () => {
     mockGit.isBranchLocalExists.mockImplementation(() => false);
     mockGit.pull.mockImplementation(() => true);
     mockGit.push.mockImplementation(() => true);
+    mockJira.moveIssueToStartProgress.mockImplementation(() => true);
 
     await tasks.start('issueKey');
     expect(mockGit.isRepoClean).toBeCalledWith();
@@ -82,6 +86,7 @@ describe('tasks.js', () => {
     expect(mockGit.pull).toBeCalledWith();
     expect(mockGit.createBranch).toBeCalledWith('SE-123/abc');
     expect(mockGit.push).toBeCalledWith('remote', 'SE-123/abc');
+    expect(mockJira.moveIssueToStartProgress).toBeCalledWith('SE-issueKey');
     expect(console.log.mock.calls.map(_ => _.join(''))).toEqual([
       'Get issue SE-issueKey info',
       'Issue: SE-123 / abc',
@@ -89,6 +94,7 @@ describe('tasks.js', () => {
       'Pull master',
       'Creating branch SE-123/abc',
       'Push branch SE-123/abc',
+      'Move issue to Start Progress...',
       'Done! Happy coding!',
     ]);
     console.log = log;
@@ -123,6 +129,7 @@ describe('tasks.js', () => {
       summary: 'abc',
     }));
     mockInput.ask.mockImplementation(() => true);
+    mockJira.moveIssueToStartProgress.mockImplementation(() => true);
     mockGit.isRepoClean.mockImplementation(() => true);
     mockGit.createBranch.mockImplementation(() => true);
     mockGit.checkout.mockImplementation(() => true);
@@ -132,11 +139,13 @@ describe('tasks.js', () => {
     expect(mockInput.ask).toBeCalledWith('Start issue SE-123 now?');
     expect(mockJira.findIssue).toBeCalledWith('SE-123');
     expect(mockGit.isBranchLocalExists).toBeCalledWith('SE-123/abc');
+    expect(mockJira.moveIssueToStartProgress).toBeCalledWith('SE-123');
     expect(console.log.mock.calls.map(_ => _.join(''))).toEqual([
       'Creating issue title',
       'Get issue SE-123 info',
       'Issue: SE-123 / abc',
       'Branch SE-123/abc already exist, checking out.',
+      'Move issue to Start Progress...',
       'Done! Happy coding!',
     ]);
     console.log = log;

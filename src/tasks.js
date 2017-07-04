@@ -51,6 +51,9 @@ exports.start = async shortIssueKey => {
     await git.checkout(branchName);
   }
 
+  console.log('Move issue to Start Progress...');
+  await jira.moveIssueToStartProgress(issueKey);
+
   console.log('Done! Happy coding!');
 };
 
