@@ -491,8 +491,8 @@ describe('tasks.js', () => {
         `</ul>`,
       ].join('\n'),
     );
-    expect(mockSlack.sendNotification).toBeCalledWith(
-      [
+    expect(mockSlack.sendNotification).toBeCalledWith({
+      text: [
         '*Frontend Apps Release `v1.2.3` (2017-07-04 10:25):*',
         'Changes:',
         '',
@@ -506,7 +506,7 @@ describe('tasks.js', () => {
         '- [CONFIG] [master] Use Bitbucket pipeline',
         '- bitbucket-pipelines.yml created online with Bitbucketenter',
       ].join('\n'),
-    );
+    });
     expect(global.Date).toBeCalledWith();
     expect(console.log.mock.calls.map(_ => _.join(''))).toEqual([
       'Fetching issues info from JIRA...',

@@ -307,7 +307,7 @@ exports.deploy = async () => {
 
   console.log('Notify on Slack...');
 
-  await slack.sendNotification(mdToSlack(releaseNote));
+  await slack.sendNotification({ text: mdToSlack(releaseNote) });
 
   console.log('Done.');
 };
