@@ -457,6 +457,7 @@ describe('tasks.js', () => {
       ['SE-2440', 'name-SE-2440'],
     ]);
     expect(mockConfluence.appendToPage).toBeCalledWith(
+      'Release Note - Frontend Apps',
       [
         `<h2 id=\"releasev123201707041025\">` +
           `Release <strong>v1.2.3</strong> (2017-07-04 10:25):</h2>`,
