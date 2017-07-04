@@ -6,10 +6,12 @@ const confluence = require('./confluence.js');
 const git = require('./git.js');
 const input = require('./input.js');
 const cmd = require('./cmd.js');
+const slack = require('./slack.js');
 const slug = require('./utils/slug.js');
 const changeLog = require('./utils/change-log.js');
 const parseJiraIssue = require('./utils/parse-jira-issue.js');
 const mdToHtml = require('./utils/md-to-html.js');
+const mdToSlack = require('./utils/md-to-slack.js');
 
 const {PROJECT_CODE, REMOTE_NAME, CONFLUENCE_RELEASE_NOTE_PAGE} = config;
 
@@ -18,7 +20,58 @@ const getFullIssueKey = issueKey =>
   '-' +
   issueKey.replace(new RegExp('^' + PROJECT_CODE + '-'), '');
 
+exports.generateReleaseNotes = async (issueKey, username) => {
+  const tagRegExp = new RegExp('\\(tag: (v\\d+\\.\\d+\\.\\d+)\\)$');
+  const fullLogs = await git.getLog('master');
+  const tagLogs = [];
+  let tagName = 'future';
+  let tagDate = 'future';
+  for (let i = 0; i < fullLogs.length; i++) {
+    const message = fullLogs[i].message;
+    if (tagRegExp.test(message)) {
+      tagName = tagRegExp.exec(message)[1];
+      tagDate = fullLogs[i].date;
+    } else {
+      tagLogs.push({tag: tagName, message, date: tagDate});
+    }
+  }
+  const tags = Array.from(new Set(tagLogs.map(_ => _.tag))).map(tag =>
+    tagLogs.find(_ => _.tag === tag),
+  );
+
+  const getTagLogs = tag =>
+    tagLogs.filter(_ => _.tag === tag).map(_ => _.message);
+
+  const releaseNotes = [
+    `# Frontend Apps Release Notes`,
+    ...(await Promise.all(
+      tags.map(tag => getTagLogs(tag.tag)).map(log =>
+        changeLog(log, PROJECT_CODE, issueKey => {
+          console.log(`Fetching ${issueKey}...`);
+          return jira.findIssue(issueKey).catch(_ => ({
+            fields: {
+              summary: '(Issue not found)',
+              creator: {name: 'error'},
+            },
+          }));
+        }),
+      ),
+    )).map((notes, index) =>
+      [
+        ``,
+        `## Release ${tags[index].tag} (${tags[index].date}):`,
+        notes.join('\n'),
+      ].join('\n'),
+    ),
+  ].join('\n');
+  console.log(releaseNotes);
+};
+
 exports.openIssue = issueKey => jira.openIssue(getFullIssueKey(issueKey));
+
+exports.moveIssue = async (issueKey, username) => {
+  return jira.moveIssue(getFullIssueKey(issueKey), username);
+};
 
 exports.start = async shortIssueKey => {
   const issueKey = getFullIssueKey(shortIssueKey);
@@ -239,7 +292,7 @@ exports.deploy = async () => {
   console.log('Updating release note...');
 
   const releaseNote = [
-    `## Release **${latestTag}** (${dateFormat(
+    `## Frontend Apps Release **${latestTag}** (${dateFormat(
       new Date(),
       'yyyy-mm-dd HH:MM',
     )}):`,
@@ -252,56 +305,9 @@ exports.deploy = async () => {
     mdToHtml(releaseNote),
   );
 
+  console.log('Notify on Slack...');
+
+  await slack.sendNotification(mdToSlack(releaseNote));
+
   console.log('Done.');
-};
-
-exports.moveIssue = async (issueKey, username) => {
-  return jira.moveIssue(getFullIssueKey(issueKey), username);
-};
-
-exports.generateReleaseNotes = async (issueKey, username) => {
-  const tagRegExp = new RegExp('\\(tag: (v\\d+\\.\\d+\\.\\d+)\\)$');
-  const fullLogs = await git.getLog('master');
-  const tagLogs = [];
-  let tagName = 'future';
-  let tagDate = 'future';
-  for (let i = 0; i < fullLogs.length; i++) {
-    const message = fullLogs[i].message;
-    if (tagRegExp.test(message)) {
-      tagName = tagRegExp.exec(message)[1];
-      tagDate = fullLogs[i].date;
-    } else {
-      tagLogs.push({tag: tagName, message, date: tagDate});
-    }
-  }
-  const tags = Array.from(new Set(tagLogs.map(_ => _.tag))).map(tag =>
-    tagLogs.find(_ => _.tag === tag),
-  );
-
-  const getTagLogs = tag =>
-    tagLogs.filter(_ => _.tag === tag).map(_ => _.message);
-
-  const releaseNotes = [
-    `# Frontend Apps Release Notes`,
-    ...(await Promise.all(
-      tags.map(tag => getTagLogs(tag.tag)).map(log =>
-        changeLog(log, PROJECT_CODE, issueKey => {
-          console.log(`Fetching ${issueKey}...`);
-          return jira.findIssue(issueKey).catch(_ => ({
-            fields: {
-              summary: '(Issue not found)',
-              creator: {name: 'error'},
-            },
-          }));
-        }),
-      ),
-    )).map((notes, index) =>
-      [
-        ``,
-        `## Release ${tags[index].tag} (${tags[index].date}):`,
-        notes.join('\n'),
-      ].join('\n'),
-    ),
-  ].join('\n');
-  console.log(releaseNotes);
 };

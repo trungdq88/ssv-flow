@@ -13,6 +13,7 @@ jest.mock('./confluence.js');
 jest.mock('./git.js');
 jest.mock('./input.js');
 jest.mock('./cmd.js');
+jest.mock('./slack.js');
 jest.mock('./utils/slug.js');
 
 const tasks = require('./tasks.js');
@@ -398,6 +399,8 @@ describe('tasks.js', () => {
     const mockCmd = require('./cmd.js');
     const mockJira = require('./jira.js');
     const mockConfluence = require('./confluence.js');
+    const mockSlack = require('./slack.js');
+    mockSlack.sendNotification.mockImplementation(() => 'master');
     mockGit.getCurrentBranchName.mockImplementation(() => 'master');
     mockGit.isRepoClean.mockImplementation(() => true);
     mockGit.getLogSinceLastTag.mockImplementation(() => [
@@ -470,8 +473,9 @@ describe('tasks.js', () => {
     expect(mockConfluence.appendToPage).toBeCalledWith(
       'Release Note - Frontend Apps',
       [
-        `<h2 id=\"releasev123201707041025\">` +
-          `Release <strong>v1.2.3</strong> (2017-07-04 10:25):</h2>`,
+        `<h2 id=\"frontendappsreleasev123201707041025\">` +
+          `Frontend Apps Release <strong>v1.2.3</strong> (2017-07-04 10:25):` +
+          `</h2>`,
         `<p>Changes:</p>`,
         `<h3 id=\"jiraissues\">JIRA issues:</h3>`,
         `<ul>`,
@@ -485,6 +489,22 @@ describe('tasks.js', () => {
         `<li>[CONFIG] [master] Use Bitbucket pipeline</li>`,
         `<li>bitbucket-pipelines.yml created online with Bitbucketenter</li>`,
         `</ul>`,
+      ].join('\n'),
+    );
+    expect(mockSlack.sendNotification).toBeCalledWith(
+      [
+        '*Frontend Apps Release `v1.2.3` (2017-07-04 10:25):*',
+        'Changes:',
+        '',
+        '*JIRA issues:*',
+        '- [SE-2449] issue SE-2449 (<@name-SE-2449>)',
+        '- [SE-2441] issue SE-2441 (<@name-SE-2441>)',
+        '- [SE-2440] issue SE-2440 (<@name-SE-2440>)',
+        '',
+        '*Others:*',
+        '- Add test-screenshot',
+        '- [CONFIG] [master] Use Bitbucket pipeline',
+        '- bitbucket-pipelines.yml created online with Bitbucketenter',
       ].join('\n'),
     );
     expect(global.Date).toBeCalledWith();
@@ -518,6 +538,7 @@ describe('tasks.js', () => {
       'Issue SE-2441... Done.',
       'Issue SE-2440... Done.',
       'Updating release note...',
+      'Notify on Slack...',
       'Done.',
     ]);
     console.log = log;
