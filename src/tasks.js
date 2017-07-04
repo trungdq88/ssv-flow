@@ -11,7 +11,7 @@ const changeLog = require('./utils/change-log.js');
 const parseJiraIssue = require('./utils/parse-jira-issue.js');
 const mdToHtml = require('./utils/md-to-html.js');
 
-const {PROJECT_CODE, REMOTE_NAME} = config;
+const {PROJECT_CODE, REMOTE_NAME, CONFLUENCE_RELEASE_NOTE_PAGE} = config;
 
 const getFullIssueKey = issueKey =>
   PROJECT_CODE +
@@ -244,7 +244,10 @@ exports.deploy = async () => {
     .concat([userChangeLog])
     .join('\n');
 
-  await confluence.appendToPage(mdToHtml(releaseNote));
+  await confluence.appendToPage(
+    CONFLUENCE_RELEASE_NOTE_PAGE,
+    mdToHtml(releaseNote),
+  );
 
   console.log('Done.');
 };
