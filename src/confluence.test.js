@@ -39,4 +39,8 @@ describe('confluence.js', () => {
   it('editPage', () => {
     return expect(confluence.editPage('title')).resolves.toBe(123);
   });
+
+  it('appendToPage', () => {
+    return expect(confluence.appendToPage('title')).resolves.toBe(123);
+  });
 });

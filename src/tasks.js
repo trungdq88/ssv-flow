@@ -1,12 +1,15 @@
 // @format
+const dateFormat = require('dateformat');
 const config = require('./config.js');
 const jira = require('./jira.js');
+const confluence = require('./confluence.js');
 const git = require('./git.js');
 const input = require('./input.js');
 const cmd = require('./cmd.js');
 const slug = require('./utils/slug.js');
 const changeLog = require('./utils/change-log.js');
 const parseJiraIssue = require('./utils/parse-jira-issue.js');
+const mdToHtml = require('./utils/md-to-html.js');
 
 const {PROJECT_CODE, REMOTE_NAME} = config;
 
@@ -231,6 +234,17 @@ exports.deploy = async () => {
   );
 
   console.log('Updating release note...');
+
+  const releaseNote = [
+    `## Release **${latestTag}** (${dateFormat(
+      new Date(),
+      'yyyy-mm-dd HH:MM',
+    )}):`,
+  ]
+    .concat([userChangeLog])
+    .join('\n');
+
+  await confluence.appendToPage(mdToHtml(releaseNote));
 
   console.log('Done.');
 };

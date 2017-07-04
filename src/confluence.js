@@ -50,3 +50,8 @@ exports.editPage = (pageTitle, content) =>
       },
     );
   });
+
+exports.appendToPage = async (pageTitle, appendContent) => {
+  const page = await exports.getPage(pageTitle);;
+  return await exports.editPage(pageTitle, appendContent + page.body);
+}

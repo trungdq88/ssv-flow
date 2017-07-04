@@ -7,6 +7,7 @@ require('./config.js').PROJECT_CODE = 'SE';
 require('./config.js').ISSUE_TRANSITIONS = ['a', 'b', 'c'];
 require('./config.js').REMOTE_NAME = 'remote';
 jest.mock('./jira.js');
+jest.mock('./confluence.js');
 jest.mock('./git.js');
 jest.mock('./input.js');
 jest.mock('./cmd.js');
@@ -377,10 +378,15 @@ describe('tasks.js', () => {
   it('deploy happy case', async () => {
     const log = console.log;
     console.log = jest.fn();
+    const originalDate = global.Date;
+    global.Date = jest
+      .fn()
+      .mockImplementation(() => new originalDate(1499138753854));
     const mockGit = require('./git.js');
     const mockInput = require('./input.js');
     const mockCmd = require('./cmd.js');
     const mockJira = require('./jira.js');
+    const mockConfluence = require('./confluence.js');
     mockGit.getCurrentBranchName.mockImplementation(() => 'master');
     mockGit.isRepoClean.mockImplementation(() => true);
     mockGit.getLogSinceLastTag.mockImplementation(() => [
@@ -396,7 +402,6 @@ describe('tasks.js', () => {
       '[CONFIG] [master] Use Bitbucket pipeline',
       'bitbucket-pipelines.yml created online with Bitbucket',
     ]);
-    mockGit.checkout.mockImplementation(() => true);
     mockJira.findIssue.mockImplementation(issueKey => ({
       fields: {
         summary: 'issue ' + issueKey,
@@ -409,7 +414,68 @@ describe('tasks.js', () => {
     mockJira.moveIssueToDeployed.mockImplementation(() => true);
     mockJira.addComment.mockImplementation(() => true);
     mockJira.assignIssue.mockImplementation(() => true);
+    mockConfluence.appendToPage.mockImplementation(() => true);
     await tasks.deploy('username');
+    expect(mockGit.getCurrentBranchName).toBeCalledWith();
+    expect(mockGit.isRepoClean).toBeCalledWith();
+    expect(mockGit.getLogSinceLastTag).toBeCalledWith('master');
+    expect(mockJira.findIssue.mock.calls).toEqual([
+      ['SE-2449'],
+      ['SE-2441'],
+      ['SE-2440'],
+    ]);
+    expect(mockInput.enter).toBeCalledWith(
+      [
+        `Changes:`,
+        ``,
+        `### JIRA issues:`,
+        `- [SE-2449] issue SE-2449 (@name-SE-2449)`,
+        `- [SE-2441] issue SE-2441 (@name-SE-2441)`,
+        `- [SE-2440] issue SE-2440 (@name-SE-2440)`,
+        ``,
+        `### Others:`,
+        `- Add test-screenshot`,
+        `- [CONFIG] [master] Use Bitbucket pipeline`,
+        `- bitbucket-pipelines.yml created online with Bitbucket`,
+      ].join('\n'),
+    );
+    expect(mockCmd.deploy).toBeCalledWith();
+    expect(mockGit.getLatestTag).toBeCalledWith();
+    expect(mockJira.moveIssueToDeployed.mock.calls).toEqual([
+      ['SE-2449'],
+      ['SE-2441'],
+      ['SE-2440'],
+    ]);
+    expect(mockJira.addComment.mock.calls).toEqual([
+      ['SE-2449', 'Done at v1.2.3.'],
+      ['SE-2441', 'Done at v1.2.3.'],
+      ['SE-2440', 'Done at v1.2.3.'],
+    ]);
+    expect(mockJira.assignIssue.mock.calls).toEqual([
+      ['SE-2449', 'name-SE-2449'],
+      ['SE-2441', 'name-SE-2441'],
+      ['SE-2440', 'name-SE-2440'],
+    ]);
+    expect(mockConfluence.appendToPage).toBeCalledWith(
+      [
+        `<h2 id=\"releasev123201707041025\">` +
+          `Release <strong>v1.2.3</strong> (2017-07-04 10:25):</h2>`,
+        `<p>Changes:</p>`,
+        `<h3 id=\"jiraissues\">JIRA issues:</h3>`,
+        `<ul>`,
+        `<li>[SE-2449] issue SE-2449 (@name-SE-2449)</li>`,
+        `<li>[SE-2441] issue SE-2441 (@name-SE-2441)</li>`,
+        `<li>[SE-2440] issue SE-2440 (@name-SE-2440)</li>`,
+        `</ul>`,
+        `<h3 id=\"others\">Others:</h3>`,
+        `<ul>`,
+        `<li>Add test-screenshot</li>`,
+        `<li>[CONFIG] [master] Use Bitbucket pipeline</li>`,
+        `<li>bitbucket-pipelines.yml created online with Bitbucketenter</li>`,
+        `</ul>`,
+      ].join('\n'),
+    );
+    expect(global.Date).toBeCalledWith();
     expect(console.log.mock.calls.map(_ => _.join(''))).toEqual([
       'Fetching issues info from JIRA...',
       'Fetching SE-2449...',
@@ -439,9 +505,11 @@ describe('tasks.js', () => {
       'Issue SE-2449... Done.',
       'Issue SE-2441... Done.',
       'Issue SE-2440... Done.',
+      'Updating release note...',
       'Done.',
     ]);
     console.log = log;
+    global.Date = originalDate;
   });
 
   it('deploy only run on master', async () => {
