@@ -5,8 +5,8 @@ const config = require('./config.js');
 const {CONFLUENCE_SPACE_KEY, CONFLUENCE_PATH} = config;
 
 const options = {
-  username: config.user,
-  password: config.password,
+  username: config.user || 'test',
+  password: config.password || 'test',
   baseUrl: config.protocol + '://' + config.host + CONFLUENCE_PATH,
 };
 
@@ -52,6 +52,6 @@ exports.editPage = (pageTitle, content) =>
   });
 
 exports.appendToPage = async (pageTitle, appendContent) => {
-  const page = await exports.getPage(pageTitle);;
+  const page = await exports.getPage(pageTitle);
   return await exports.editPage(pageTitle, appendContent + page.body);
-}
+};
