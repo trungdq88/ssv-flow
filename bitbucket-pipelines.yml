@@ -11,5 +11,6 @@ pipelines:
         caches:
           - node
         script: # Modify the commands below to build your repository.
+          - unlink /etc/localtime && ln -s /usr/share/zoneinfo/Etc/GMT-7 /etc/localtime
           - yarn install
           - CI=true yarn test
