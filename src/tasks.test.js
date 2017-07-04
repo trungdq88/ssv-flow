@@ -6,6 +6,8 @@ require('./config.js').host = 'host';
 require('./config.js').PROJECT_CODE = 'SE';
 require('./config.js').ISSUE_TRANSITIONS = ['a', 'b', 'c'];
 require('./config.js').REMOTE_NAME = 'remote';
+require('./config.js').CONFLUENCE_RELEASE_NOTE_PAGE =
+  'Release Note - Frontend Apps';
 jest.mock('./jira.js');
 jest.mock('./confluence.js');
 jest.mock('./git.js');
