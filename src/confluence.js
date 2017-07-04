@@ -52,6 +52,23 @@ exports.editPage = (pageTitle, content) =>
   });
 
 exports.appendToPage = async (pageTitle, appendContent) => {
-  const page = await exports.getPage(pageTitle);
-  return await exports.editPage(pageTitle, appendContent + page.body);
+  return new Promise(async (resolve, reject) => {
+    const page = await exports.getPage(pageTitle);
+    const content = appendContent + page.body.storage.value;
+    confluenceApi.putContent(
+      CONFLUENCE_SPACE_KEY,
+      page.id,
+      page.version.number + 1,
+      page.title,
+      content,
+      (err, success) => {
+        if (err) {
+          console.log(err);
+          reject(err);
+          return;
+        }
+        resolve(success);
+      },
+    );
+  });
 };

@@ -1,6 +1,11 @@
 // @format
 
-const mockPage = {id: 123, title: 'title', body: 'body', version: {number: 1}};
+const mockPage = {
+  id: 123,
+  title: 'title',
+  body: {storage: {value: 'content'}},
+  version: {number: 1},
+};
 jest.mock('./config.js');
 require('./config.js').protocol = 'https';
 require('./config.js').host = 'host';
@@ -18,7 +23,7 @@ require('./lib/confluence-api.js').mockImplementation(() => ({
       1,
     ),
   putContent: (spaceKey, id, version, title, content, callback) =>
-    setTimeout(() => callback(null, id), 1),
+    setTimeout(() => callback(null, content), 1),
 }));
 
 const confluence = require('./confluence.js');
@@ -37,10 +42,12 @@ describe('confluence.js', () => {
   });
 
   it('editPage', () => {
-    return expect(confluence.editPage('title')).resolves.toBe(123);
+    return expect(confluence.editPage('title', 'aaa')).resolves.toBe('aaa');
   });
 
   it('appendToPage', () => {
-    return expect(confluence.appendToPage('title')).resolves.toBe(123);
+    return expect(confluence.appendToPage('title', 'append')).resolves.toBe(
+      'appendcontent',
+    );
   });
 });
