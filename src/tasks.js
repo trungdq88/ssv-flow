@@ -151,7 +151,7 @@ exports.commit = async fastCommitMessage => {
   console.log('Awesome!');
 };
 
-exports.done = async username => {
+exports.done = async () => {
   const currentBranchName = await git.getCurrentBranchName();
   const issueKey = currentBranchName.split('/')[0];
   if (currentBranchName === 'master') {

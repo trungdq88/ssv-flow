@@ -41,10 +41,10 @@ program
   });
 
 program
-  .command('done <username>')
+  .command('done')
   .description('Complete an issue')
-  .action(user => {
-    tasks.done(user);
+  .action(() => {
+    tasks.done();
   });
 
 program
