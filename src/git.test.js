@@ -324,4 +324,22 @@ describe('git.js', () => {
     expect(mockSimpleGit).toBeCalledWith('/DUMMY');
     return expect(p).resolves.toEqual(['1', '2']);
   });
+
+  it('getLogSinceLastTag case 2', () => {
+    const mockSimpleGit = require('simple-git').mockImplementation(() => ({
+      log: ([branch], callback) =>
+        callback(null, {
+          all: [
+            {message: '1'},
+            {message: '2'},
+            {message: '3 (tag: v1.2.3, origin)'},
+            {message: '4'},
+          ],
+        }),
+    }));
+    const p = git.getLogSinceLastTag('master');
+    expect(mockSimpleGit).toBeCalledWith('/DUMMY');
+    return expect(p).resolves.toEqual(['1', '2']);
+  });
+
 });

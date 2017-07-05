@@ -188,7 +188,7 @@ exports.getLogSinceLastTag = branch => {
           .slice(
             0,
             log.all.findIndex(line =>
-              /\(tag: v\d+\.\d+\.\d+\)$/.test(line.message),
+              /\(tag: v\d+\.\d+\.\d+(\)$|,.*$)/.test(line.message),
             ),
           )
           .map(line => line.message),
