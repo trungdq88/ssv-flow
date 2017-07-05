@@ -2,42 +2,57 @@
 
 ## Config
 
-Example `config.js`:
+Example `env.json`:
 
-    exports.protocol = 'https';
-    exports.host = 'yourcompany.atlassian.net';
-    exports.port = '443';
-    exports.user = 'myemail@compary.vn';
-    exports.password = 'mypassword';
-
-    exports.ME = 'quangtrung';
-    exports.PROJECT_SE = '10100';
-    exports.PRIORITY_MEDIUM = '3';
-    exports.ISSUE_TYPE_TASK = '10400';
-    exports.SPRINT_CUSTOM_FIELD_ID = 'customfield_10115';
-    exports.ACTIVE_BOARD = 'Broad name';
-    exports.COMPONENT_HQ_FRONTEND = '10101';
-    exports.PROJECT_CODE = 'SE';
-
-    exports.REPO_PATH = './';
-
-    exports.ISSUE_TRANSITIONS = [
-      'Start Analysis',
-      'Analysis Complete',
-      'Start Progress',
-      'Code Review',
-      'Start Review',
-      'Review Passed',
-      'Deployed',
-    ];
-
-    exports.REMOTE_NAME = 'origin';
+    {
+      "protocol": "https",
+      "host": "example.atlassian.net",
+      "port": "443",
+      "user": "quangtrung@example.vn",
+      "password": "yourpassword",
+      "ME": "quangtrung",
+      "PROJECT_SE": "10100",
+      "PRIORITY_MEDIUM": "3",
+      "ISSUE_TYPE_TASK": "10400",
+      "SPRINT_CUSTOM_FIELD_ID": "customfield_10115",
+      "ACTIVE_BOARD": "Board Name",
+      "COMPONENT_HQ_FRONTEND": "10101",
+      "PROJECT_CODE": "SE",
+      "REPO_PATH": "./",
+      "ISSUE_TRANSITIONS": [
+        "Start Analysis",
+        "Analysis Complete",
+        "Start Progress",
+        "Code Review",
+        "Start Review",
+        "Review Passed",
+        "Deployed"
+      ],
+      "ISSUE_TRANSITIONS_START_PROGRESS": [
+        "Start Analysis",
+        "Analysis Complete",
+        "Start Progress"
+      ],
+      "ISSUE_TRANSITIONS_READY_TO_DEPLOY": [
+        "Code Review",
+        "Start Review",
+        "Review Passed"
+      ],
+      "ISSUE_TRANSITIONS_DEPLOYED": [
+        "Deployed"
+      ],
+      "REMOTE_NAME": "origin",
+      "CONFLUENCE_SPACE_KEY": "key",
+      "CONFLUENCE_PATH": "/wiki",
+      "CONFLUENCE_RELEASE_NOTE_PAGE": "page title",
+      "SLACK_NOTIFY_ENDPOINT": "url"
+    }
 
 ## Spec:
 
 ### `p new (:issueTitle)`
 
-  - Create issue with title
+  - Create JIRA issue with title
   - Ask if want to start
 
 ### `p start (:issueNumber)`
@@ -46,6 +61,8 @@ Example `config.js`:
   - Checkout & pull master
   - Create branch with issue number & issue title, checkout created branch
   - Push branch to all remote
+  - Assign issue to me
+  - Move issue to Start Progress
 
 ### `p commit (:issueMessage)`
 
@@ -55,7 +72,7 @@ Example `config.js`:
 
 ### `p done (:username)`
 
-  - Now allow run on master branch
+  - Not allow run on master branch
   - Check repo clean
   - Merge from master
   - Check repo conflict
@@ -74,6 +91,8 @@ Example `config.js`:
   - Move all pending issues to Deployed
   - Comment version number
   - Assign issue to coresponding usernames
+  - Update release notes on Confluence
+  - Notify via Slack
 
 ### `p open (:issueNumber)`
 
