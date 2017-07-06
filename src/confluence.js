@@ -67,7 +67,7 @@ exports.appendToPage = async (pageTitle, appendContent) => {
           reject(err);
           return;
         }
-        resolve(success);
+        resolve(options.baseUrl + page._links.webui);
       },
     );
   });

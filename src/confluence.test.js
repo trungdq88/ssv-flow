@@ -5,6 +5,7 @@ const mockPage = {
   title: 'title',
   body: {storage: {value: 'content'}},
   version: {number: 1},
+  _links: {webui: 'link here'},
 };
 jest.mock('./config.js');
 require('./config.js').protocol = 'https';
@@ -47,7 +48,7 @@ describe('confluence.js', () => {
 
   it('appendToPage', () => {
     return expect(confluence.appendToPage('title', 'append')).resolves.toBe(
-      'appendcontent',
+      'https://hostpathlink here',
     );
   });
 });

@@ -1,6 +1,6 @@
 // @format
-module.exports = markdown => {
-  return markdown
+module.exports = (markdown, link) => {
+  let result = markdown
     .split('\n')
     .map(_ =>
       _.replace(/^##\s*(.*?)\*\*(.*?)\*\*(.*?)$/g, '*$1`$2`$3*')
@@ -8,4 +8,13 @@ module.exports = markdown => {
         .replace(/\(@(.*?)\)$/, '(<@$1>)'),
     )
     .join('\n');
+
+  if (link) {
+    const parts = result.split('\n');
+    result =
+      parts[0].replace(/^(.*?)$/, `<${link}|$1>\n`) +
+      parts.slice(1, result.length - 1).join('\n');
+  }
+
+  return result;
 };

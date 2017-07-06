@@ -300,14 +300,14 @@ exports.deploy = async () => {
     .concat([userChangeLog])
     .join('\n');
 
-  await confluence.appendToPage(
+  const releaseNoteUrl = await confluence.appendToPage(
     CONFLUENCE_RELEASE_NOTE_PAGE,
     mdToHtml(releaseNote),
   );
 
   console.log('Notify on Slack...');
 
-  await slack.sendNotification({ text: mdToSlack(releaseNote) });
+  await slack.sendNotification({text: mdToSlack(releaseNote, releaseNoteUrl)});
 
   console.log('Done.');
 };

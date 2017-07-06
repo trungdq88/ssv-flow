@@ -428,7 +428,7 @@ describe('tasks.js', () => {
     mockJira.moveIssueToDeployed.mockImplementation(() => true);
     mockJira.addComment.mockImplementation(() => true);
     mockJira.assignIssue.mockImplementation(() => true);
-    mockConfluence.appendToPage.mockImplementation(() => true);
+    mockConfluence.appendToPage.mockImplementation(() => 'link here');
     await tasks.deploy('username');
     expect(mockGit.getCurrentBranchName).toBeCalledWith();
     expect(mockGit.isRepoClean).toBeCalledWith();
@@ -493,7 +493,7 @@ describe('tasks.js', () => {
     );
     expect(mockSlack.sendNotification).toBeCalledWith({
       text: [
-        '*Frontend Apps Release `v1.2.3` (2017-07-04 10:25):*',
+        '<link here|*Frontend Apps Release `v1.2.3` (2017-07-04 10:25):*>',
         'Changes:',
         '',
         '*JIRA issues:*',
