@@ -24,14 +24,17 @@ describe('change-log.js', () => {
           summary: `issue key ${issueKey}`,
           creator: {name: `name-${issueKey}`},
         }}),
+        {
+          jiraIssueLink: 'http://jira-link',
+        }
       ),
     ).resolves.toEqual([
       `Changes:`,
       ``,
       `### JIRA issues:`,
-      `- [SE-2449] issue key SE-2449 (@name-SE-2449)`,
-      `- [SE-2441] issue key SE-2441 (@name-SE-2441)`,
-      `- [SE-2440] issue key SE-2440 (@name-SE-2440)`,
+      `- [[SE-2449]](http://jira-link/SE-2449) issue key SE-2449 (@name-SE-2449)`,
+      `- [[SE-2441]](http://jira-link/SE-2441) issue key SE-2441 (@name-SE-2441)`,
+      `- [[SE-2440]](http://jira-link/SE-2440) issue key SE-2440 (@name-SE-2440)`,
       ``,
       `### Others:`,
       `- Add test-screenshot`,

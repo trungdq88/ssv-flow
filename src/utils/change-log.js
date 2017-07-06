@@ -3,7 +3,7 @@ module.exports = async (
   logs,
   jiraTaskPrefix,
   getJiraIssueInfo,
-  {jiraIssueOnly = false} = {},
+  {jiraIssueOnly = false, jiraIssueLink = null} = {},
 ) => {
   const jiraRegExp = new RegExp(
     '[\\[\\s](' + jiraTaskPrefix + '-\\d+)[\\]\\s]',
@@ -34,9 +34,14 @@ module.exports = async (
     if (sectionCount >= 2) {
       output = output.concat([`### JIRA issues:`]);
     }
-    output = output.concat(
-      jiraIssues.map(_ => `- [${_.key}] ${_.title} (@${_.creator})`),
-    );
+    let lineTransform = line =>
+      `- [${line.key}] ${line.title} (@${line.creator})`;
+    if (jiraIssueLink !== null) {
+      lineTransform = line =>
+        `- [[${line.key}]](${jiraIssueLink}/${line.key})` +
+        ` ${line.title} (@${line.creator})`;
+    }
+    output = output.concat(jiraIssues.map(lineTransform));
   }
 
   if (others.length) {
