@@ -443,9 +443,12 @@ describe('tasks.js', () => {
         `Changes:`,
         ``,
         `### JIRA issues:`,
-        `- [SE-2449] issue SE-2449 (@name-SE-2449)`,
-        `- [SE-2441] issue SE-2441 (@name-SE-2441)`,
-        `- [SE-2440] issue SE-2440 (@name-SE-2440)`,
+        `- [[SE-2449]](https://host/browse/SE-2449) ` +
+          `issue SE-2449 (@name-SE-2449)`,
+        `- [[SE-2441]](https://host/browse/SE-2441) ` +
+          `issue SE-2441 (@name-SE-2441)`,
+        `- [[SE-2440]](https://host/browse/SE-2440) ` +
+          `issue SE-2440 (@name-SE-2440)`,
         ``,
         `### Others:`,
         `- Add test-screenshot`,
@@ -479,9 +482,12 @@ describe('tasks.js', () => {
         `<p>Changes:</p>`,
         `<h3 id=\"jiraissues\">JIRA issues:</h3>`,
         `<ul>`,
-        `<li>[SE-2449] issue SE-2449 (@name-SE-2449)</li>`,
-        `<li>[SE-2441] issue SE-2441 (@name-SE-2441)</li>`,
-        `<li>[SE-2440] issue SE-2440 (@name-SE-2440)</li>`,
+        `<li><a href=\"https://host/browse/SE-2449\">[SE-2449]</a> ` +
+          `issue SE-2449 (@name-SE-2449)</li>`,
+        `<li><a href=\"https://host/browse/SE-2441\">[SE-2441]</a> ` +
+          `issue SE-2441 (@name-SE-2441)</li>`,
+        `<li><a href=\"https://host/browse/SE-2440\">[SE-2440]</a> ` +
+          `issue SE-2440 (@name-SE-2440)</li>`,
         `</ul>`,
         `<h3 id=\"others\">Others:</h3>`,
         `<ul>`,
@@ -497,9 +503,12 @@ describe('tasks.js', () => {
         'Changes:',
         '',
         '*JIRA issues:*',
-        '- [SE-2449] issue SE-2449 (<@name-SE-2449>)',
-        '- [SE-2441] issue SE-2441 (<@name-SE-2441>)',
-        '- [SE-2440] issue SE-2440 (<@name-SE-2440>)',
+        `- [[SE-2449]](https://host/browse/SE-2449) ` +
+          `issue SE-2449 (<@name-SE-2449>)`,
+        `- [[SE-2441]](https://host/browse/SE-2441) ` +
+          `issue SE-2441 (<@name-SE-2441>)`,
+        `- [[SE-2440]](https://host/browse/SE-2440) ` +
+          `issue SE-2440 (<@name-SE-2440>)`,
         '',
         '*Others:*',
         '- Add test-screenshot',
@@ -517,9 +526,12 @@ describe('tasks.js', () => {
         `Changes:`,
         ``,
         `### JIRA issues:`,
-        `- [SE-2449] issue SE-2449 (@name-SE-2449)`,
-        `- [SE-2441] issue SE-2441 (@name-SE-2441)`,
-        `- [SE-2440] issue SE-2440 (@name-SE-2440)`,
+        `- [[SE-2449]](https://host/browse/SE-2449) ` +
+          `issue SE-2449 (@name-SE-2449)`,
+        `- [[SE-2441]](https://host/browse/SE-2441) ` +
+          `issue SE-2441 (@name-SE-2441)`,
+        `- [[SE-2440]](https://host/browse/SE-2440) ` +
+          `issue SE-2440 (@name-SE-2440)`,
         ``,
         `### Others:`,
         `- Add test-screenshot`,

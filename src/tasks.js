@@ -255,6 +255,8 @@ exports.deploy = async () => {
   const changeLogText = await changeLog(logs, PROJECT_CODE, issueKey => {
     console.log(`Fetching ${issueKey}...`);
     return jira.findIssue(issueKey);
+  }, {
+    jiraIssueLink: config.protocol + '://' + config.host + '/browse',
   });
   const userChangeLog = await input.enter(changeLogText.join('\n'));
 
