@@ -4,6 +4,13 @@ jest.mock('./config.js');
 require('./config.js').protocol = 'https';
 require('./config.js').host = 'host';
 require('./config.js').PROJECT_CODE = 'SE';
+require('./config.js').PROJECT_SE = '123123';
+require('./config.js').ISSUE_TYPE_TASK = 'issue-type';
+require('./config.js').ME = 'me';
+require('./config.js').PRIORITY_MEDIUM = 'medium';
+require('./config.js').COMPONENT_HQ_FRONTEND = 'hq-frontend';
+require('./config.js').SPRINT_CUSTOM_FIELD_ID = 'sprint';
+require('./config.js').STORY_POINT_FIELD_ID = 'story-point';
 require('./config.js').ISSUE_TRANSITIONS = ['a', 'b', 'c'];
 require('./config.js').ISSUE_TRANSITIONS_READY_TO_DEPLOY = ['b'];
 require('./config.js').ISSUE_TRANSITIONS_DEPLOYED = ['c'];
@@ -34,6 +41,7 @@ require('./lib/jira-api.js').JiraApi.mockImplementation(() => ({
     name: 'sprint_name',
   }),
   addNewIssue: issue => ({
+    issue,
     key: 'issue_key',
   }),
 }));
@@ -64,7 +72,22 @@ describe('jira.js', () => {
   it('create issue', async () => {
     const log = console.log;
     console.log = jest.fn();
-    await jira.createIssue('title');
+    const issue = await jira.createIssue('title', 1);
+    expect(issue).toEqual({
+      issue: {
+        fields: {
+          assignee: {name: 'me'},
+          components: [{id: 'hq-frontend'}],
+          issuetype: {id: 'issue-type'},
+          priority: {id: 'medium'},
+          project: {id: '123123'},
+          sprint: 'sprint_id',
+          'story-point': 1,
+          summary: 'title',
+        },
+      },
+      key: 'issue_key',
+    });
     expect(console.log.mock.calls.map(_ => _.join(''))).toEqual([
       'Get project information code "SE"',
       'Get board information of project "getProject"',

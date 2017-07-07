@@ -9,6 +9,7 @@ const {
   PRIORITY_MEDIUM,
   ISSUE_TYPE_TASK,
   SPRINT_CUSTOM_FIELD_ID,
+  STORY_POINT_FIELD_ID,
   ACTIVE_BOARD,
   COMPONENT_HQ_FRONTEND,
   ISSUE_TRANSITIONS,
@@ -61,7 +62,7 @@ exports.openIssue = issueKey => {
   opn(config.protocol + '://' + config.host + '/browse/' + issueKey);
 };
 
-exports.createIssue = async issueTitle => {
+exports.createIssue = async (issueTitle, storyPoint) => {
   console.log(`Get project information code "${PROJECT_CODE}"`);
   const project = await jiraApi.getProject(PROJECT_CODE);
 
@@ -92,6 +93,7 @@ exports.createIssue = async issueTitle => {
         },
       ],
       [SPRINT_CUSTOM_FIELD_ID]: activeSprint.id,
+      [STORY_POINT_FIELD_ID]: storyPoint,
     },
   };
 

@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 process.on('unhandledRejection', e => {
+  console.log(e);
   throw e;
 });
 
@@ -20,10 +21,10 @@ program
   });
 
 program
-  .command('new <issueTitle>')
+  .command('new <issueTitle> <storyPoint>')
   .description('Create new task')
-  .action(issueTitle => {
-    tasks.createIssue(issueTitle);
+  .action((issueTitle, storyPoint) => {
+    tasks.createIssue(issueTitle, storyPoint);
   });
 
 program

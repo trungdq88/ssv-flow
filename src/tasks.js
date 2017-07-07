@@ -110,9 +110,9 @@ exports.start = async shortIssueKey => {
   console.log('Done! Happy coding!');
 };
 
-exports.createIssue = async issueTitle => {
+exports.createIssue = async (issueTitle, storyPoint) => {
   console.log(`Creating issue ${issueTitle}`);
-  const issue = await jira.createIssue(issueTitle);
+  const issue = await jira.createIssue(issueTitle, storyPoint);
 
   if (await input.ask(`Start issue ${issue.key} now?`)) {
     return exports.start(issue.key);
@@ -252,12 +252,17 @@ exports.deploy = async () => {
 
   console.log('Fetching issues info from JIRA...');
   const logs = await git.getLogSinceLastTag('master');
-  const changeLogText = await changeLog(logs, PROJECT_CODE, issueKey => {
-    console.log(`Fetching ${issueKey}...`);
-    return jira.findIssue(issueKey);
-  }, {
-    jiraIssueLink: config.protocol + '://' + config.host + '/browse',
-  });
+  const changeLogText = await changeLog(
+    logs,
+    PROJECT_CODE,
+    issueKey => {
+      console.log(`Fetching ${issueKey}...`);
+      return jira.findIssue(issueKey);
+    },
+    {
+      jiraIssueLink: config.protocol + '://' + config.host + '/browse',
+    },
+  );
   const userChangeLog = await input.enter(changeLogText.join('\n'));
 
   if (!userChangeLog) {
