@@ -63,6 +63,18 @@ describe('commit-tag.js', () => {
     );
   });
 
+  it('TEST', () => {
+    expect(
+      commitTag(['src/__tests__/aoeu/aeou.,/,p.']),
+    ).toBe('[TEST]');
+  });
+
+  it('TEST, CDC', () => {
+    expect(
+      commitTag(['src/__tests__/aoeu/aeou.,/,p.', 'src/portals/cdc/aoeu']),
+    ).toBe('[TEST/CDC]');
+  });
+
   it('Empty', () => {
     expect(commitTag([])).toBe('');
   });

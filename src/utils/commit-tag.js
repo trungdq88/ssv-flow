@@ -3,6 +3,10 @@ module.exports = statusFilePaths => {
 
   if (statusFilePaths.length === 0) return '';
 
+  if (statusFilePaths.some(_ => /^src\/__tests__/.test(_))) {
+    tags.push('TEST');
+  }
+
   if (statusFilePaths.some(_ => /^src\/portals\/_shared/.test(_))) {
     tags.push('SHARED');
   }

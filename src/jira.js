@@ -93,7 +93,7 @@ exports.createIssue = async (issueTitle, storyPoint) => {
         },
       ],
       [SPRINT_CUSTOM_FIELD_ID]: activeSprint.id,
-      [STORY_POINT_FIELD_ID]: storyPoint,
+      [STORY_POINT_FIELD_ID]: Number(storyPoint),
     },
   };
 
