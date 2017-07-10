@@ -503,11 +503,11 @@ describe('tasks.js', () => {
         'Changes:',
         '',
         '*JIRA issues:*',
-        `- [[SE-2449]](https://host/browse/SE-2449) ` +
+        `- <SE-2449|https://host/browse/SE-2449> ` +
           `issue SE-2449 (<@name-SE-2449>)`,
-        `- [[SE-2441]](https://host/browse/SE-2441) ` +
+        `- <SE-2441|https://host/browse/SE-2441> ` +
           `issue SE-2441 (<@name-SE-2441>)`,
-        `- [[SE-2440]](https://host/browse/SE-2440) ` +
+        `- <SE-2440|https://host/browse/SE-2440> ` +
           `issue SE-2440 (<@name-SE-2440>)`,
         '',
         '*Others:*',
