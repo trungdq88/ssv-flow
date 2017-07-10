@@ -1,7 +1,7 @@
 {
   "name": "ssv-flow",
   "description": "Task automation for ssv-portals",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "author": "Trung Dinh Quang <trungdq88@gmail.com>",
   "dependencies": {
     "colors": "^1.1.2",
