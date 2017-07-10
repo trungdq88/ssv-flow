@@ -99,7 +99,7 @@ program
 
 program
   .command('move <issueKey> <username>')
-  .description()
+  .description('Move issue')
   .action((issueKey, username) => {
     tasks.moveIssue(issueKey, username);
   });
