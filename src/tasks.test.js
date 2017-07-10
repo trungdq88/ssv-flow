@@ -110,8 +110,8 @@ describe('tasks.js', () => {
       key: 'SE-123',
     }));
     mockInput.ask.mockImplementation(() => false);
-    await tasks.createIssue('title', 3);
-    expect(mockJira.createIssue).toBeCalledWith('title', 3);
+    await tasks.createIssue('title', 3, 'bug');
+    expect(mockJira.createIssue).toBeCalledWith('title', 3, 'bug');
     expect(mockInput.ask).toBeCalledWith('Start issue SE-123 now?');
     expect(console.log.mock.calls.map(_ => _.join(''))).toEqual([
       'Creating issue title',
@@ -135,8 +135,8 @@ describe('tasks.js', () => {
     mockGit.createBranch.mockImplementation(() => true);
     mockGit.checkout.mockImplementation(() => true);
     mockGit.isBranchLocalExists.mockImplementation(() => true);
-    await tasks.createIssue('title', 4);
-    expect(mockJira.createIssue).toBeCalledWith('title', 4);
+    await tasks.createIssue('title', 4, 'bug');
+    expect(mockJira.createIssue).toBeCalledWith('title', 4, 'bug');
     expect(mockInput.ask).toBeCalledWith('Start issue SE-123 now?');
     expect(mockJira.findIssue).toBeCalledWith('SE-123');
     expect(mockGit.isBranchLocalExists).toBeCalledWith('SE-123/abc');

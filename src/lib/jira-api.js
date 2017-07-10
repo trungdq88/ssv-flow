@@ -1410,18 +1410,20 @@ const JiraApi = (exports.JiraApi = function(
       json: true,
     };
 
-    this.doRequest(options, function(error, response, body) {
-      if (error) {
-        callback(error, null);
-        return;
-      }
+    return new Promise((resolve, reject) => {
+      this.doRequest(options, function(error, response, body) {
+        if (error) {
+          reject(error);
+          return;
+        }
 
-      if (response.statusCode === 200) {
-        callback(null, body);
-        return;
-      }
+        if (response.statusCode === 200) {
+          resolve(body);
+          return;
+        }
 
-      callback(response.statusCode + ': Error while retrieving issue types');
+        reject(response.statusCode + ': Error while retrieving issue types');
+      });
     });
   };
 

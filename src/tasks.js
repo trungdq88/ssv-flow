@@ -110,9 +110,9 @@ exports.start = async shortIssueKey => {
   console.log('Done! Happy coding!');
 };
 
-exports.createIssue = async (issueTitle, storyPoint) => {
+exports.createIssue = async (issueTitle, storyPoint, type) => {
   console.log(`Creating issue ${issueTitle}`);
-  const issue = await jira.createIssue(issueTitle, storyPoint);
+  const issue = await jira.createIssue(issueTitle, storyPoint, type);
 
   if (await input.ask(`Start issue ${issue.key} now?`)) {
     return exports.start(issue.key);

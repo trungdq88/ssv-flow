@@ -10,8 +10,7 @@ const program = require('commander');
 
 const tasks = require('./src/tasks.js');
 
-program
-  .version(pkg.version);
+program.version(pkg.version);
 
 program
   .command('open <issueNumber>')
@@ -21,43 +20,86 @@ program
   });
 
 program
-  .command('new <issueTitle> <storyPoint>')
-  .description('Create new task')
-  .action((issueTitle, storyPoint) => {
-    tasks.createIssue(issueTitle, storyPoint);
+  .command('new <issueTitle> <storyPoint> [type]')
+  .description(
+    [` - Create JIRA issue with title`, ` - Ask if want to start`].join('\n'),
+  )
+  .action((issueTitle, storyPoint, type) => {
+    tasks.createIssue(issueTitle, storyPoint, type);
   });
 
 program
   .command('start <issueNumber>')
-  .description('Start working on an issue')
+  .description(
+    [
+      ` - Check repo clean`,
+      ` - Checkout & pull master`,
+      ` - Create branch with issue number & issue title`,
+      ` - Checkout created branch`,
+      ` - Push branch to all remote`,
+      ` - Assign issue to me`,
+      ` - Move issue to Start Progress`,
+    ].join('\n'),
+  )
   .action(issueNumber => {
     tasks.start(issueNumber);
   });
 
 program
   .command('commit [commitMessage]')
-  .description('Commit current changes')
+  .description(
+    [
+      ` - Print git status`,
+      ` - Ask view diff / add message / cancel`,
+      ` - Create commit with commit message tagged`,
+    ].join('\n'),
+  )
   .action(commitMessage => {
     tasks.commit(commitMessage);
   });
 
 program
   .command('done')
-  .description('Complete an issue')
+  .description(
+    [
+      ` - Not allow run on master branch`,
+      ` - Check repo clean`,
+      ` - Merge from master`,
+      ` - Check repo conflict`,
+      ` - Run tests`,
+      ` - Checkout master`,
+      ` - Merge back from branch`,
+      ` - Push master to remotes`,
+      ` - Move issues to ready to deploy`,
+    ].join('\n'),
+  )
   .action(() => {
     tasks.done();
   });
 
 program
   .command('deploy')
-  .description('Deploy all remaining issues and move JIRA ticket to QA')
+  .description(
+    [
+      ` - Only allow run in master`,
+      ` - Check repo clean`,
+      ` - Check for pending issues not empty`,
+      ` - Allow enter usernames for issues`,
+      ` - Bump version && push all branches & tags to all remotes`,
+      ` - Move all pending issues to Deployed`,
+      ` - Comment version number`,
+      ` - Assign issue to coresponding usernames`,
+      ` - Update release notes on Confluence`,
+      ` - Notify via Slack`,
+    ].join('\n'),
+  )
   .action(() => {
     tasks.deploy();
   });
 
 program
   .command('move <issueKey> <username>')
-  .description('Move an issue to QA and assign to a user')
+  .description()
   .action((issueKey, username) => {
     tasks.moveIssue(issueKey, username);
   });

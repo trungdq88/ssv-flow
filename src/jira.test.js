@@ -5,7 +5,8 @@ require('./config.js').protocol = 'https';
 require('./config.js').host = 'host';
 require('./config.js').PROJECT_CODE = 'SE';
 require('./config.js').PROJECT_SE = '123123';
-require('./config.js').ISSUE_TYPE_TASK = 'issue-type';
+require('./config.js').ISSUE_TYPE_TASK = 'task';
+require('./config.js').ISSUE_TYPE_BUG = 'bug';
 require('./config.js').ME = 'me';
 require('./config.js').PRIORITY_MEDIUM = 'medium';
 require('./config.js').COMPONENT_HQ_FRONTEND = 'hq-frontend';
@@ -69,7 +70,7 @@ describe('jira.js', () => {
     expect(opn).toBeCalledWith('https://host/browse/SE-1234');
   });
 
-  it('create issue', async () => {
+  it('create issue task', async () => {
     const log = console.log;
     console.log = jest.fn();
     const issue = await jira.createIssue('title', 1);
@@ -78,7 +79,7 @@ describe('jira.js', () => {
         fields: {
           assignee: {name: 'me'},
           components: [{id: 'hq-frontend'}],
-          issuetype: {id: 'issue-type'},
+          issuetype: {id: 'task'},
           priority: {id: 'medium'},
           project: {id: '123123'},
           sprint: 'sprint_id',
@@ -92,7 +93,36 @@ describe('jira.js', () => {
       'Get project information code "SE"',
       'Get board information of project "getProject"',
       'Get active sprint of board "board_name"',
-      'Creating issue in sprint_name...',
+      'Creating issue (task) in sprint_name...',
+      'Issue created: issue_key',
+    ]);
+    console.log = log;
+  });
+
+  it('create issue bug', async () => {
+    const log = console.log;
+    console.log = jest.fn();
+    const issue = await jira.createIssue('title', 1, 'bug');
+    expect(issue).toEqual({
+      issue: {
+        fields: {
+          assignee: {name: 'me'},
+          components: [{id: 'hq-frontend'}],
+          issuetype: {id: 'bug'},
+          priority: {id: 'medium'},
+          project: {id: '123123'},
+          sprint: 'sprint_id',
+          'story-point': 1,
+          summary: 'title',
+        },
+      },
+      key: 'issue_key',
+    });
+    expect(console.log.mock.calls.map(_ => _.join(''))).toEqual([
+      'Get project information code "SE"',
+      'Get board information of project "getProject"',
+      'Get active sprint of board "board_name"',
+      'Creating issue (bug) in sprint_name...',
       'Issue created: issue_key',
     ]);
     console.log = log;

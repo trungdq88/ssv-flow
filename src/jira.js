@@ -8,6 +8,9 @@ const {
   PROJECT_SE,
   PRIORITY_MEDIUM,
   ISSUE_TYPE_TASK,
+  ISSUE_TYPE_BUG,
+  ISSUE_TYPE_CHANGE,
+  ISSUE_TYPE_OTHER,
   SPRINT_CUSTOM_FIELD_ID,
   STORY_POINT_FIELD_ID,
   ACTIVE_BOARD,
@@ -62,7 +65,7 @@ exports.openIssue = issueKey => {
   opn(config.protocol + '://' + config.host + '/browse/' + issueKey);
 };
 
-exports.createIssue = async (issueTitle, storyPoint) => {
+exports.createIssue = async (issueTitle, storyPoint, type) => {
   console.log(`Get project information code "${PROJECT_CODE}"`);
   const project = await jiraApi.getProject(PROJECT_CODE);
 
@@ -72,6 +75,19 @@ exports.createIssue = async (issueTitle, storyPoint) => {
   console.log(`Get active sprint of board "${board.name}"`);
   const activeSprint = await jiraApi.getLastSprintForRapidView(board.id);
 
+  const issueType = type || 'task';
+  const issueTypeId = {
+    task: ISSUE_TYPE_TASK,
+    bug: ISSUE_TYPE_BUG,
+    other: ISSUE_TYPE_OTHER,
+    change: ISSUE_TYPE_CHANGE,
+  }[issueType];
+
+  if (!issueTypeId) {
+    console.error(`Issue type ${issueType} not supported!`);
+    return;
+  }
+
   const issueFields = {
     fields: {
       project: {
@@ -79,7 +95,7 @@ exports.createIssue = async (issueTitle, storyPoint) => {
       },
       summary: issueTitle,
       issuetype: {
-        id: ISSUE_TYPE_TASK,
+        id: issueTypeId,
       },
       assignee: {
         name: ME,
@@ -97,7 +113,7 @@ exports.createIssue = async (issueTitle, storyPoint) => {
     },
   };
 
-  console.log(`Creating issue in ${activeSprint.name}...`);
+  console.log(`Creating issue (${issueType}) in ${activeSprint.name}...`);
   const issue = await jiraApi.addNewIssue(issueFields);
 
   console.log('Issue created: ', issue.key);
