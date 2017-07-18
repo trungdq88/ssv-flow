@@ -69,9 +69,9 @@ exports.checkout = branchName => {
   });
 };
 
-exports.push = (remote, branchName) => {
+exports.push = (remote, branchName, options) => {
   return new Promise((resolve, reject) => {
-    SimpleGit(pathToRepo).push(remote, branchName, (err, success) => {
+    SimpleGit(pathToRepo).push(remote, branchName, options, (err, success) => {
       if (err) {
         reject(err);
         return;
@@ -205,6 +205,42 @@ exports.getLog = branch => {
         return;
       }
       resolve(log.all);
+    });
+  });
+};
+
+exports.getAllTags = () => {
+  return new Promise((resolve, reject) => {
+    SimpleGit(pathToRepo).tags((err, tags) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      resolve(tags.all);
+    });
+  });
+};
+
+exports.addTag = name => {
+  return new Promise((resolve, reject) => {
+    SimpleGit(pathToRepo).addTag(name, err => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      resolve();
+    });
+  });
+};
+
+exports.pushTags = remote => {
+  return new Promise((resolve, reject) => {
+    SimpleGit(pathToRepo).pushTags(remote, err => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      resolve();
     });
   });
 };

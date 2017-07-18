@@ -12,10 +12,12 @@ describe('slack.js', () => {
       .mockImplementation((options, callback) => {
         setTimeout(() => callback(null, 'hello'), 1);
       }));
-    slack.sendNotification('content');
+    slack.sendNotification({
+      text: 'content',
+    });
     expect(done.mock.calls[0].slice(0, 2)).toEqual([
       'endpointttttttt',
-      {json: 'content'},
+      { json: { text: 'content' } },
     ]);
   });
 });

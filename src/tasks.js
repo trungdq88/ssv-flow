@@ -3,6 +3,7 @@ const dateFormat = require('dateformat');
 const config = require('./config.js');
 const jira = require('./jira.js');
 const confluence = require('./confluence.js');
+const version = require('./version.js');
 const git = require('./git.js');
 const input = require('./input.js');
 const cmd = require('./cmd.js');
@@ -12,8 +13,11 @@ const changeLog = require('./utils/change-log.js');
 const parseJiraIssue = require('./utils/parse-jira-issue.js');
 const mdToHtml = require('./utils/md-to-html.js');
 const mdToSlack = require('./utils/md-to-slack.js');
+const { getLatestFeatureTagRcNumber } = require('./utils/utils.js');
 
-const {PROJECT_CODE, REMOTE_NAME, CONFLUENCE_RELEASE_NOTE_PAGE} = config;
+const { PROJECT_CODE, REMOTE_NAME, CONFLUENCE_RELEASE_NOTE_PAGE } = config;
+
+const jiraIssueLink = config.protocol + '://' + config.host + '/browse';
 
 const getFullIssueKey = issueKey =>
   PROJECT_CODE +
@@ -32,7 +36,7 @@ exports.generateReleaseNotes = async (issueKey, username) => {
       tagName = tagRegExp.exec(message)[1];
       tagDate = fullLogs[i].date;
     } else {
-      tagLogs.push({tag: tagName, message, date: tagDate});
+      tagLogs.push({ tag: tagName, message, date: tagDate });
     }
   }
   const tags = Array.from(new Set(tagLogs.map(_ => _.tag))).map(tag =>
@@ -51,7 +55,7 @@ exports.generateReleaseNotes = async (issueKey, username) => {
           return jira.findIssue(issueKey).catch(_ => ({
             fields: {
               summary: '(Issue not found)',
-              creator: {name: 'error'},
+              creator: { name: 'error' },
             },
           }));
         }),
@@ -98,7 +102,7 @@ exports.start = async shortIssueKey => {
     await git.createBranch(branchName);
 
     console.log(`Push branch ${branchName}`);
-    await git.push(REMOTE_NAME, branchName);
+    await git.push(REMOTE_NAME, branchName, { '-u': true });
   } else {
     console.log(`Branch ${branchName} already exist, checking out.`);
     await git.checkout(branchName);
@@ -142,7 +146,7 @@ exports.commit = async fastCommitMessage => {
     await addAll();
     return await new Promise((resolve, reject) => {
       const spawn = require('child_process').spawn;
-      const gitDiff = spawn('git', ['diff', '--staged'], {stdio: 'inherit'});
+      const gitDiff = spawn('git', ['diff', '--staged'], { stdio: 'inherit' });
       gitDiff.on('exit', resolve);
     });
   }
@@ -180,9 +184,9 @@ exports.commit = async fastCommitMessage => {
   const choice = await input.choice(
     'Please select an action',
     [
-      {value: 'd', key: 'd', name: 'Show diff'},
-      {value: 'a', key: 'a', name: 'Add all & write commit message'},
-      {value: 'c', key: 'c', name: 'Cancel'},
+      { value: 'd', key: 'd', name: 'Show diff' },
+      { value: 'a', key: 'a', name: 'Add all & write commit message' },
+      { value: 'c', key: 'c', name: 'Cancel' },
     ],
     1,
   );
@@ -204,7 +208,7 @@ exports.commit = async fastCommitMessage => {
   console.log('Awesome!');
 };
 
-exports.done = async () => {
+exports.done = async (featureName, username) => {
   const currentBranchName = await git.getCurrentBranchName();
   const issueKey = currentBranchName.split('/')[0];
   if (currentBranchName === 'master') {
@@ -217,22 +221,41 @@ exports.done = async () => {
     return;
   }
 
-  await git.merge('master', currentBranchName);
-
-  if (!await git.isRepoClean()) {
-    console.log('There is conflict after merge, please fix it!');
-    return;
-  }
-
+  console.log('Running tests...');
   await cmd.runTests();
 
-  await git.checkout('master');
+  const latestVersion = await version.getLatestVersion();
+  const tags = await git.getAllTags();
+  const rcNumber = getLatestFeatureTagRcNumber(
+    tags,
+    featureName,
+    latestVersion,
+  );
+  const tag = `${latestVersion}.${featureName}.rc${rcNumber + 1}`;
 
-  await git.merge(currentBranchName, 'master');
-
-  await git.push(REMOTE_NAME, 'master');
-
+  console.log(`Creating tag ${tag}...`);
+  await git.addTag(tag);
+  console.log(`Pushing tag ${tag}...`);
+  await git.pushTags('origin');
+  console.log(`Moving issue ${issueKey}...`);
   await jira.moveIssueToReadyToDeploy(issueKey);
+  await jira.moveIssueToDeployed(issueKey);
+  console.log(`Adding comment...`);
+  await jira.addComment(issueKey, `Done at feature-${tag}`);
+  console.log(`Assign issue to ${username}...`);
+  await jira.assignIssue(issueKey, username);
+  const issue = await jira.findIssue(issueKey);
+  console.log(`Notify to Slack...`);
+  await slack.sendNotification({
+    text: [
+      `*Frontend Apps Feature Branch Released: \`${tag}\` (${dateFormat(
+        new Date(),
+        'yyyy-mm-dd HH:MM',
+      )})*`,
+      `Changes: <${jiraIssueLink}/${issueKey}|${issueKey}> ` +
+        `${issue.fields.summary} (<@${username}>)`,
+    ].join('\n'),
+  });
 
   console.log('Done');
 };
@@ -260,7 +283,7 @@ exports.deploy = async () => {
       return jira.findIssue(issueKey);
     },
     {
-      jiraIssueLink: config.protocol + '://' + config.host + '/browse',
+      jiraIssueLink,
     },
   );
   const userChangeLog = await input.enter(changeLogText.join('\n'));
@@ -286,7 +309,7 @@ exports.deploy = async () => {
 
   console.log(`Moving && assigning ${pendingIssues.length} issue(s)...`);
   await Promise.all(
-    pendingIssues.map(({issueKey, username}) =>
+    pendingIssues.map(({ issueKey, username }) =>
       (async () => {
         await jira.moveIssueToDeployed(issueKey);
         await jira.addComment(issueKey, `Done at ${latestTag}.`);
@@ -314,7 +337,9 @@ exports.deploy = async () => {
 
   console.log('Notify on Slack...');
 
-  await slack.sendNotification({text: mdToSlack(releaseNote, releaseNoteUrl)});
+  await slack.sendNotification({
+    text: mdToSlack(releaseNote, releaseNoteUrl),
+  });
 
   console.log('Done.');
 };

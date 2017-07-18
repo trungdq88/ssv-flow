@@ -13,7 +13,7 @@ describe('git.js', () => {
   });
 
   it('getCommitTag', () => {
-    const dummyFiles = [{path: '123'}, {path: '345'}];
+    const dummyFiles = [{ path: '123' }, { path: '345' }];
     const mockSimpleGit = require('simple-git').mockImplementation(() => ({
       status: callback =>
         callback(null, {
@@ -39,7 +39,7 @@ describe('git.js', () => {
   });
 
   it('isRepoClean false', () => {
-    const dummyFiles = [{path: '123'}, {path: '345'}];
+    const dummyFiles = [{ path: '123' }, { path: '345' }];
     const mockSimpleGit = require('simple-git').mockImplementation(() => ({
       status: callback =>
         callback(null, {
@@ -129,7 +129,7 @@ describe('git.js', () => {
 
   it('push', () => {
     const mockSimpleGit = require('simple-git').mockImplementation(() => ({
-      push: (remote, branch, callback) => callback(null, remote),
+      push: (remote, branch, options, callback) => callback(null, remote),
     }));
     const p = git.push('aaa', 'bbb');
     expect(mockSimpleGit).toBeCalledWith('/DUMMY');
@@ -138,7 +138,7 @@ describe('git.js', () => {
 
   it('push error', () => {
     const mockSimpleGit = require('simple-git').mockImplementation(() => ({
-      push: (remote, branch, callback) => callback('error'),
+      push: (remote, branch, options, callback) => callback('error'),
     }));
     const p = git.push('aaa', 'bbb');
     expect(mockSimpleGit).toBeCalledWith('/DUMMY');
@@ -189,8 +189,8 @@ describe('git.js', () => {
 
   it('getStatusPrint', () => {
     const dummyFiles = [
-      {path: '123', working_dir: '1', index: '2'},
-      {path: '345', working_dir: '3', index: '4'},
+      { path: '123', working_dir: '1', index: '2' },
+      { path: '345', working_dir: '3', index: '4' },
     ];
     const mockSimpleGit = require('simple-git').mockImplementation(() => ({
       status: callback =>
@@ -250,8 +250,8 @@ describe('git.js', () => {
         callback(null, {
           all: ['1', '2'],
           branches: {
-            '1': {current: true, name: 'mot'},
-            '2': {current: false, name: 'hai'},
+            '1': { current: true, name: 'mot' },
+            '2': { current: false, name: 'hai' },
           },
         }),
     }));
@@ -313,10 +313,10 @@ describe('git.js', () => {
       log: ([branch], callback) =>
         callback(null, {
           all: [
-            {message: '1'},
-            {message: '2'},
-            {message: '3 (tag: v1.2.3)'},
-            {message: '4'},
+            { message: '1' },
+            { message: '2' },
+            { message: '3 (tag: v1.2.3)' },
+            { message: '4' },
           ],
         }),
     }));
@@ -330,10 +330,10 @@ describe('git.js', () => {
       log: ([branch], callback) =>
         callback(null, {
           all: [
-            {message: '1'},
-            {message: '2'},
-            {message: '3 (tag: v1.2.3, origin)'},
-            {message: '4'},
+            { message: '1' },
+            { message: '2' },
+            { message: '3 (tag: v1.2.3, origin)' },
+            { message: '4' },
           ],
         }),
     }));
@@ -342,4 +342,46 @@ describe('git.js', () => {
     return expect(p).resolves.toEqual(['1', '2']);
   });
 
+  it('getAllTags', () => {
+    const mockSimpleGit = require('simple-git').mockImplementation(() => ({
+      tags: callback =>
+        callback(null, {
+          latest: '1.2.3',
+          all: [
+            'v0.0.3',
+            'v0.0.4.feature1.rc1',
+            'v0.0.4.feature1.rc2',
+            'v0.0.7',
+            'v0.0.8',
+          ],
+        }),
+    }));
+    const p = git.getAllTags();
+    expect(mockSimpleGit).toBeCalledWith('/DUMMY');
+    return expect(p).resolves.toEqual([
+      'v0.0.3',
+      'v0.0.4.feature1.rc1',
+      'v0.0.4.feature1.rc2',
+      'v0.0.7',
+      'v0.0.8',
+    ]);
+  });
+
+  it('addTag', () => {
+    const mockSimpleGit = require('simple-git').mockImplementation(() => ({
+      addTag: (name, callback) => callback(null, true),
+    }));
+    const p = git.addTag();
+    expect(mockSimpleGit).toBeCalledWith('/DUMMY');
+    return expect(p).resolves.toBe(undefined);
+  });
+
+  it('pushTags', () => {
+    const mockSimpleGit = require('simple-git').mockImplementation(() => ({
+      pushTags: (name, callback) => callback(null, true),
+    }));
+    const p = git.pushTags('origin');
+    expect(mockSimpleGit).toBeCalledWith('/DUMMY');
+    return expect(p).resolves.toBe(undefined);
+  });
 });

@@ -59,7 +59,7 @@ program
   });
 
 program
-  .command('done')
+  .command('done <featureName> <username>')
   .description(
     [
       ` - Not allow run on master branch`,
@@ -73,8 +73,8 @@ program
       ` - Move issues to ready to deploy`,
     ].join('\n'),
   )
-  .action(() => {
-    tasks.done();
+  .action((featureName, username) => {
+    tasks.done(featureName, username);
   });
 
 program
