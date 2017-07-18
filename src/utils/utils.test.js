@@ -1,4 +1,7 @@
-const { getLatestFeatureTagRcNumber } = require('./utils.js');
+const {
+  getLatestFeatureTagRcNumber,
+  parseBranchNameToJiraIssueKey,
+} = require('./utils.js');
 
 describe('utils.js', () => {
   it('getLatestFeatureTagRcNumber', () => {
@@ -63,5 +66,14 @@ describe('utils.js', () => {
         'v0.0.5',
       ),
     ).toBe(0);
+  });
+
+  it('parseBranchNameToJiraIssueKey', () => {
+    expect(
+      parseBranchNameToJiraIssueKey(
+        ['aoeu', '9823497', 'SE-1234/aoeu874320', 'SE-4321/aoeudcr'],
+        'SE',
+      ),
+    ).toEqual(['SE-1234', 'SE-4321']);
   });
 });

@@ -13,7 +13,10 @@ const changeLog = require('./utils/change-log.js');
 const parseJiraIssue = require('./utils/parse-jira-issue.js');
 const mdToHtml = require('./utils/md-to-html.js');
 const mdToSlack = require('./utils/md-to-slack.js');
-const { getLatestFeatureTagRcNumber } = require('./utils/utils.js');
+const {
+  getLatestFeatureTagRcNumber,
+  parseBranchNameToJiraIssueKey,
+} = require('./utils/utils.js');
 
 const { PROJECT_CODE, REMOTE_NAME, CONFLUENCE_RELEASE_NOTE_PAGE } = config;
 
@@ -342,4 +345,35 @@ exports.deploy = async () => {
   });
 
   console.log('Done.');
+};
+
+exports.getPendingIssues = async () => {
+  const unmergedBranches = await git.getAllUnmergedBranches();
+  const issueKeys = parseBranchNameToJiraIssueKey(
+    unmergedBranches,
+    PROJECT_CODE,
+  );
+
+  if (issueKeys.length === 0) {
+    console.log('No pending issues! :-)');
+    return;
+  }
+
+  const issues = await Promise.all(
+    issueKeys.map(issueKey => jira.findIssue(issueKey)),
+  );
+
+  console.log(`* Pending issues *`);
+
+  const output = issues
+    .map(
+      issue =>
+        `- ${issue.key}: ${issue.fields.summary} ` +
+        `(@${issue.fields.creator.name})`,
+    )
+    .join('\n');
+
+  console.log(output);
+
+  console.log('===================');
 };

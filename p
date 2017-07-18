@@ -105,6 +105,13 @@ program
   });
 
 program
+  .command('pending')
+  .description('See all pending JIRA issues (not merged to master)')
+  .action(() => {
+    tasks.getPendingIssues();
+  });
+
+program
   .command('generate-release-notes')
   .description('Generate release notes')
   .action((issueKey, username) => {

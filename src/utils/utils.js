@@ -7,3 +7,9 @@ exports.getLatestFeatureTagRcNumber = (tags, featureName, version) => {
     versionFeature[versionFeature.length - 1].split(versionString)[1],
   );
 };
+
+exports.parseBranchNameToJiraIssueKey = (names, issuePrefix) => {
+  return names
+    .filter(name => name.match(new RegExp(`^${issuePrefix}-\\d+?/.*$`)))
+    .map(name => name.replace(new RegExp(`^(${issuePrefix}-\\d+?)/.*$`), '$1'));
+};

@@ -384,4 +384,13 @@ describe('git.js', () => {
     expect(mockSimpleGit).toBeCalledWith('/DUMMY');
     return expect(p).resolves.toBe(undefined);
   });
+
+  it('getAllUnmergedBranches', () => {
+    const mockSimpleGit = require('simple-git').mockImplementation(() => ({
+      raw: (options, callback) => callback(null, 'aoeu'),
+    }));
+    const p = git.getAllUnmergedBranches('origin');
+    expect(mockSimpleGit).toBeCalledWith('/DUMMY');
+    return expect(p).resolves.toEqual(['aoeu']);
+  });
 });

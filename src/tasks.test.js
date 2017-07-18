@@ -587,4 +587,36 @@ describe('tasks.js', () => {
     ]);
     console.log = log;
   });
+
+  it('getPendingIssues', async () => {
+    const log = console.log;
+    console.log = jest.fn();
+
+    const mockGit = require('./git.js');
+    const mockJira = require('./jira.js');
+    mockJira.findIssue.mockImplementation(issueKey => ({
+      key: issueKey,
+      fields: {
+        summary: issueKey + ' summary',
+        creator: { name: issueKey + ' creator' },
+      },
+    }));
+    mockGit.getAllUnmergedBranches.mockImplementation(() => [
+      'SE-1234/aoehulrcaoheu',
+      'SE-222/98457894597843',
+      'aoeu',
+      '123',
+    ]);
+    await tasks.getPendingIssues();
+
+    expect(mockGit.getAllUnmergedBranches).toBeCalledWith();
+    expect(mockJira.findIssue.mock.calls).toEqual([['SE-1234'], ['SE-222']]);
+    expect(console.log.mock.calls.map(_ => _.join(''))).toEqual([
+      '* Pending issues *',
+      '- SE-1234: SE-1234 summary (@SE-1234 creator)\n' +
+        '- SE-222: SE-222 summary (@SE-222 creator)',
+      '===================',
+    ]);
+    console.log = log;
+  });
 });

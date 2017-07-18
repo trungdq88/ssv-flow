@@ -244,3 +244,15 @@ exports.pushTags = remote => {
     });
   });
 };
+
+exports.getAllUnmergedBranches = () => {
+  return new Promise((resolve, reject) => {
+    SimpleGit(pathToRepo).raw(['branch', '--no-merged'], (err, output) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      resolve(output.split('\n').map(_ => _.trim()).filter(_ => _));
+    });
+  });
+};
