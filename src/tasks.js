@@ -314,9 +314,9 @@ exports.deploy = async () => {
   await Promise.all(
     pendingIssues.map(({ issueKey, username }) =>
       (async () => {
-        await jira.moveIssueToDeployed(issueKey);
-        await jira.addComment(issueKey, `Done at ${latestTag}.`);
-        await jira.assignIssue(issueKey, username);
+        // await jira.moveIssueToDeployed(issueKey);
+        await jira.addComment(issueKey, `Released at ${latestTag}.`);
+        // await jira.assignIssue(issueKey, username);
         console.log(`Issue ${issueKey}... Done.`);
       })(),
     ),

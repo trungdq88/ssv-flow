@@ -476,21 +476,21 @@ describe('tasks.js', () => {
     );
     expect(mockCmd.deploy).toBeCalledWith();
     expect(mockGit.getLatestTag).toBeCalledWith();
-    expect(mockJira.moveIssueToDeployed.mock.calls).toEqual([
-      ['SE-2449'],
-      ['SE-2441'],
-      ['SE-2440'],
-    ]);
+    // expect(mockJira.moveIssueToDeployed.mock.calls).toEqual([
+    //   ['SE-2449'],
+    //   ['SE-2441'],
+    //   ['SE-2440'],
+    // ]);
     expect(mockJira.addComment.mock.calls).toEqual([
-      ['SE-2449', 'Done at v1.2.3.'],
-      ['SE-2441', 'Done at v1.2.3.'],
-      ['SE-2440', 'Done at v1.2.3.'],
+      ['SE-2449', 'Released at v1.2.3.'],
+      ['SE-2441', 'Released at v1.2.3.'],
+      ['SE-2440', 'Released at v1.2.3.'],
     ]);
-    expect(mockJira.assignIssue.mock.calls).toEqual([
-      ['SE-2449', 'name-SE-2449'],
-      ['SE-2441', 'name-SE-2441'],
-      ['SE-2440', 'name-SE-2440'],
-    ]);
+    // expect(mockJira.assignIssue.mock.calls).toEqual([
+    //   ['SE-2449', 'name-SE-2449'],
+    //   ['SE-2441', 'name-SE-2441'],
+    //   ['SE-2440', 'name-SE-2440'],
+    // ]);
     expect(mockConfluence.appendToPage).toBeCalledWith(
       'Release Note - Frontend Apps',
       [
