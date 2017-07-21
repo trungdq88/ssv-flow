@@ -378,6 +378,7 @@ describe('tasks.js', () => {
     expect(mockJira.moveIssueToDeployed).toBeCalledWith('SE-123');
     expect(mockGit.getAllTags).toBeCalledWith();
     expect(mockGit.addTag).toBeCalledWith('v1.2.3.feature.rc1');
+    expect(mockGit.checkout).toBeCalledWith('master');
     expect(mockGit.pushTags).toBeCalledWith('origin');
     expect(mockVersion.getLatestVersion).toBeCalledWith();
     expect(mockJira.addComment).toBeCalledWith(
@@ -387,7 +388,7 @@ describe('tasks.js', () => {
     expect(mockJira.assignIssue).toBeCalledWith('SE-123', 'username');
     expect(mockSlack.sendNotification).toBeCalledWith({
       text:
-        '*Frontend Apps Feature Branch Released: `v1.2.3.feature.rc1` ' +
+        '*Frontend Apps Feature Branch Released: `feature-v1.2.3.feature.rc1` ' +
         '(2017-07-04 10:25)*\nChanges: <https://host/browse/SE-123|SE-123> ' +
         '555 (<@username>)',
     });
@@ -399,6 +400,7 @@ describe('tasks.js', () => {
       'Adding comment...',
       'Assign issue to username...',
       'Notify to Slack...',
+      'Back to master...',
       'Done',
     ]);
     console.log = log;

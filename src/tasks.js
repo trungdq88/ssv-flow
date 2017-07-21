@@ -251,7 +251,7 @@ exports.done = async (featureName, username) => {
   console.log(`Notify to Slack...`);
   await slack.sendNotification({
     text: [
-      `*Frontend Apps Feature Branch Released: \`${tag}\` (${dateFormat(
+      `*Frontend Apps Feature Branch Released: \`feature-${tag}\` (${dateFormat(
         new Date(),
         'yyyy-mm-dd HH:MM',
       )})*`,
@@ -259,6 +259,9 @@ exports.done = async (featureName, username) => {
         `${issue.fields.summary} (<@${username}>)`,
     ].join('\n'),
   });
+
+  console.log('Back to master...');
+  await git.checkout('master');
 
   console.log('Done');
 };
