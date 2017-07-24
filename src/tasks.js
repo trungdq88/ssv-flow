@@ -260,6 +260,9 @@ exports.done = async (featureName, username) => {
     ].join('\n'),
   });
 
+  console.log('Update Unreleased note...');
+  await exports.updateUnreleasedNote();
+
   console.log('Back to master...');
   await git.checkout('master');
 
@@ -365,18 +368,65 @@ exports.getPendingIssues = async () => {
   const issues = await Promise.all(
     issueKeys.map(issueKey => jira.findIssue(issueKey)),
   );
-
-  console.log(`* Pending issues *`);
+  const issueFeatureTags = await Promise.all(
+    issueKeys.map(issueKey => git.getIssueFeatureTag(issueKey)),
+  );
 
   const output = issues
     .map(
-      issue =>
-        `- ${issue.key}: ${issue.fields.summary} ` +
-        `(@${issue.fields.creator.name})`,
+      (issue, index) =>
+        `- [${issue.key}](${jiraIssueLink}/${issue.key})` +
+        ` ${issue.fields.summary}` +
+        ` (@${issue.fields.creator.name})${issueFeatureTags[index]
+          ? ` (\`feature-${issueFeatureTags[index]}\`)`
+          : ''}`,
     )
     .join('\n');
 
+  console.log(`* Pending issues *`);
   console.log(output);
-
   console.log('===================');
+
+  return output;
+};
+
+exports.updateUnreleasedNote = async () => {
+  const template = '';
+  const page = await confluence.getPage(CONFLUENCE_RELEASE_NOTE_PAGE);
+  const content = page.body.storage.value;
+  const pendingIssues = await exports.getPendingIssues();
+
+  let unreleasedNote;
+
+  if (pendingIssues) {
+    const html = mdToHtml(pendingIssues);
+    unreleasedNote =
+      `<blockquote>` +
+      `<h1>Unreleased</h1>` +
+      `<p id="unreleased-note">` +
+      html +
+      `</p>` +
+      `</blockquote>`;
+  } else {
+    unreleasedNote =
+      `<blockquote>` +
+      `<h1>Unreleased</h1>` +
+      `<p id="unreleased-note">` +
+      `No pending issue :-)` +
+      `</p>` +
+      `</blockquote>`;
+  }
+
+  let newContent;
+
+  if (content.indexOf('<blockquote>') === 0) {
+    newContent = content.replace(
+      /<blockquote>[\s\S]*?<\/blockquote>/,
+      unreleasedNote,
+    );
+  } else {
+    newContent = unreleasedNote + content;
+  }
+
+  await confluence.editPage(CONFLUENCE_RELEASE_NOTE_PAGE, newContent);
 };

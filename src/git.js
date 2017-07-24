@@ -256,3 +256,27 @@ exports.getAllUnmergedBranches = () => {
     });
   });
 };
+
+exports.getIssueFeatureTag = issueKey => {
+  // tag: v2.4.42.fix_empty_status.rc1, origin/SE-2621/aoeu
+  return new Promise((resolve, reject) => {
+    SimpleGit(pathToRepo).log(['--all'], (err, log) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      const msgs = log.all
+        .map(line => line.message)
+        .filter(msg => msg.indexOf(`origin/${issueKey}/`) > -1)
+        .filter(msg => msg.indexOf(`tag: v`) > -1);
+      if (msgs.length) {
+        const matches = /tag: (v\d+\.\d+\.\d+\..*?\.rc\d+?),/.exec(msgs[0]);
+        const tag = matches[1];
+        resolve(tag);
+      } else {
+        resolve('');
+        return;
+      }
+    });
+  });
+};

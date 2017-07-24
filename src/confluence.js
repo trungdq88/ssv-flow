@@ -2,7 +2,7 @@
 const ConfluenceApi = require('./lib/confluence-api.js');
 const config = require('./config.js');
 
-const {CONFLUENCE_SPACE_KEY, CONFLUENCE_PATH} = config;
+const { CONFLUENCE_SPACE_KEY, CONFLUENCE_PATH } = config;
 
 const options = {
   username: config.user || 'test',

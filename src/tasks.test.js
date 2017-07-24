@@ -370,7 +370,10 @@ describe('tasks.js', () => {
     mockJira.addComment.mockImplementation(() => true);
     mockJira.assignIssue.mockImplementation(() => true);
     mockSlack.sendNotification.mockImplementation(() => true);
+    const _func = tasks.updateUnreleasedNote;
+    tasks.updateUnreleasedNote = jest.fn();
     await tasks.done('feature', 'username');
+    tasks.updateUnreleasedNote = _func;
     expect(mockGit.getCurrentBranchName).toBeCalledWith();
     expect(mockGit.isRepoClean).toBeCalledWith();
     expect(mockCmd.runTests).toBeCalledWith();
@@ -400,6 +403,7 @@ describe('tasks.js', () => {
       'Adding comment...',
       'Assign issue to username...',
       'Notify to Slack...',
+      'Update Unreleased note...',
       'Back to master...',
       'Done',
     ]);
@@ -609,16 +613,132 @@ describe('tasks.js', () => {
       'aoeu',
       '123',
     ]);
+    mockGit.getIssueFeatureTag.mockImplementation(
+      issueKey => `issue-${issueKey}-rc1`,
+    );
     await tasks.getPendingIssues();
 
     expect(mockGit.getAllUnmergedBranches).toBeCalledWith();
     expect(mockJira.findIssue.mock.calls).toEqual([['SE-1234'], ['SE-222']]);
     expect(console.log.mock.calls.map(_ => _.join(''))).toEqual([
       '* Pending issues *',
-      '- SE-1234: SE-1234 summary (@SE-1234 creator)\n' +
-        '- SE-222: SE-222 summary (@SE-222 creator)',
+      '- [SE-1234](https://host/browse/SE-1234) ' +
+        'SE-1234 summary (@SE-1234 creator) (`feature-issue-SE-1234-rc1`)\n' +
+        '- [SE-222](https://host/browse/SE-222) ' +
+        'SE-222 summary (@SE-222 creator) (`feature-issue-SE-222-rc1`)',
       '===================',
     ]);
     console.log = log;
+  });
+
+  it('updateUnreleasedNote', async () => {
+    const log = console.log;
+    console.log = jest.fn();
+    const originalDate = global.Date;
+    global.Date = jest
+      .fn()
+      .mockImplementation(() => new originalDate(1499138753854));
+    const mockConfluence = require('./confluence.js');
+    const mockGit = require('./git.js');
+    const mockJira = require('./jira.js');
+    mockJira.findIssue.mockImplementation(issueKey => ({
+      key: issueKey,
+      fields: {
+        summary: issueKey + ' summary',
+        creator: { name: issueKey + ' creator' },
+      },
+    }));
+    mockGit.getAllUnmergedBranches.mockImplementation(() => [
+      'SE-234/aoehulrcaoheu',
+      'SE-222/98457894597843',
+      'aoeu',
+      '123',
+    ]);
+    mockConfluence.editPage.mockImplementation(() => true);
+    mockConfluence.getPage.mockImplementation(() => ({
+      body: {
+        storage: {
+          value: '123',
+        },
+      },
+    }));
+    await tasks.updateUnreleasedNote();
+    expect(mockConfluence.getPage).toBeCalledWith(
+      'Release Note - Frontend Apps',
+    );
+    expect(mockConfluence.editPage.mock.calls).toEqual([
+      [
+        'Release Note - Frontend Apps',
+        '<blockquote><h1>Unreleased</h1><p id="unreleased-note"><ul>\n' +
+          '<li><a href="https://host/browse/SE-234">SE-234</a>' +
+          ' SE-234 summary (@SE-234 creator)' +
+          ' (<code>feature-issue-SE-234-rc1</code>)' +
+          '</li>\n' +
+          '<li><a href="https://host/browse/SE-222">SE-222</a>' +
+          ' SE-222 summary (@SE-222 creator)' +
+          ' (<code>feature-issue-SE-222-rc1</code>)' +
+          '</li>\n' +
+          '</ul></p></blockquote>123',
+      ],
+    ]);
+    console.log = log;
+    global.Date = originalDate;
+  });
+
+  it('updateUnreleasedNote with existing note', async () => {
+    const log = console.log;
+    console.log = jest.fn();
+    const originalDate = global.Date;
+    global.Date = jest
+      .fn()
+      .mockImplementation(() => new originalDate(1499138753854));
+    const mockConfluence = require('./confluence.js');
+    const mockGit = require('./git.js');
+    const mockJira = require('./jira.js');
+    mockJira.findIssue.mockImplementation(issueKey => ({
+      key: issueKey,
+      fields: {
+        summary: issueKey + ' summary',
+        creator: { name: issueKey + ' creator' },
+      },
+    }));
+    mockGit.getAllUnmergedBranches.mockImplementation(() => [
+      'SE-234/aoehulrcaoheu',
+      'SE-222/98457894597843',
+      'aoeu',
+      '123',
+    ]);
+    mockConfluence.getPage.mockImplementation(() => ({
+      body: {
+        storage: {
+          value:
+            '<blockquote><ul>\n' +
+            '<li>existing</li>' +
+            '</ul></blockquote>123',
+        },
+      },
+    }));
+    mockConfluence.editPage.mockImplementation(() => true);
+    await tasks.updateUnreleasedNote();
+    expect(mockConfluence.getPage).toBeCalledWith(
+      'Release Note - Frontend Apps',
+    );
+    expect(mockConfluence.editPage.mock.calls).toEqual([
+      [
+        'Release Note - Frontend Apps',
+        '<blockquote><h1>Unreleased</h1><p id="unreleased-note"><ul>\n' +
+          '<li><a href="https://host/browse/SE-234">SE-234</a>' +
+          ' SE-234 summary (@SE-234 creator)' +
+          ' (<code>feature-issue-SE-234-rc1</code>)' +
+          '</li>\n' +
+          '<li><a href="https://host/browse/SE-222">SE-222</a>' +
+          ' SE-222 summary (@SE-222 creator)' +
+          ' (<code>feature-issue-SE-222-rc1</code>)' +
+          '</li>\n' +
+          '</ul></p></blockquote>123',
+      ],
+    ]);
+    console.log = log;
+    global.Date = originalDate;
   });
 });

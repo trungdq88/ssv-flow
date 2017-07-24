@@ -118,6 +118,13 @@ program
     tasks.generateReleaseNotes(issueKey, username);
   });
 
+program
+  .command('update-unreleased-note')
+  .description('updateUnreleasedNote')
+  .action(() => {
+    tasks.updateUnreleasedNote();
+  });
+
 program.parse(process.argv);
 
 if (program.args.length === 0) {

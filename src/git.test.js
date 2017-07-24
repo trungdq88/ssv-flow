@@ -393,4 +393,21 @@ describe('git.js', () => {
     expect(mockSimpleGit).toBeCalledWith('/DUMMY');
     return expect(p).resolves.toEqual(['aoeu']);
   });
+
+  it('getIssueFeatureTag', () => {
+    const mockSimpleGit = require('simple-git').mockImplementation(() => ({
+      log: (options, callback) =>
+        callback(null, {
+          all: [
+            { message: '1' },
+            { message: '2' },
+            { message: '3 (tag: v1.2.3.feature_123.rc3, origin/SE-123/aoeu)' },
+            { message: '4' },
+          ],
+        }),
+    }));
+    const p = git.getIssueFeatureTag('SE-123');
+    expect(mockSimpleGit).toBeCalledWith('/DUMMY');
+    return expect(p).resolves.toEqual('v1.2.3.feature_123.rc3');
+  });
 });
