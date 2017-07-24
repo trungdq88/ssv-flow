@@ -18,7 +18,12 @@ const {
   parseBranchNameToJiraIssueKey,
 } = require('./utils/utils.js');
 
-const { PROJECT_CODE, REMOTE_NAME, CONFLUENCE_RELEASE_NOTE_PAGE } = config;
+const {
+  PROJECT_CODE,
+  REMOTE_NAME,
+  CONFLUENCE_RELEASE_NOTE_PAGE,
+  CONFLUENCE_RELEASE_NOTE_PAGE_URL,
+} = config;
 
 const jiraIssueLink = config.protocol + '://' + config.host + '/browse';
 
@@ -251,10 +256,11 @@ exports.done = async (featureName, username) => {
   console.log(`Notify to Slack...`);
   await slack.sendNotification({
     text: [
-      `*Frontend Apps Feature Branch Released: \`feature-${tag}\` (${dateFormat(
-        new Date(),
-        'yyyy-mm-dd HH:MM',
-      )})*`,
+      `<${CONFLUENCE_RELEASE_NOTE_PAGE_URL}|` +
+        `*Frontend Apps Feature Branch Released: \`feature-${tag}\` (${dateFormat(
+          new Date(),
+          'yyyy-mm-dd HH:MM',
+        )})*>`,
       `Changes: <${jiraIssueLink}/${issueKey}|${issueKey}> ` +
         `${issue.fields.summary} (<@${username}>)`,
     ].join('\n'),

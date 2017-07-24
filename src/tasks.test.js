@@ -8,6 +8,7 @@ require('./config.js').ISSUE_TRANSITIONS = ['a', 'b', 'c'];
 require('./config.js').REMOTE_NAME = 'remote';
 require('./config.js').CONFLUENCE_RELEASE_NOTE_PAGE =
   'Release Note - Frontend Apps';
+require('./config.js').CONFLUENCE_RELEASE_NOTE_PAGE_URL = 'http://url';
 jest.mock('./jira.js');
 jest.mock('./confluence.js');
 jest.mock('./git.js');
@@ -391,8 +392,9 @@ describe('tasks.js', () => {
     expect(mockJira.assignIssue).toBeCalledWith('SE-123', 'username');
     expect(mockSlack.sendNotification).toBeCalledWith({
       text:
-        '*Frontend Apps Feature Branch Released: `feature-v1.2.3.feature.rc1` ' +
-        '(2017-07-04 10:25)*\nChanges: <https://host/browse/SE-123|SE-123> ' +
+        '<http://url|*Frontend Apps Feature Branch Released: ' +
+        '`feature-v1.2.3.feature.rc1` ' +
+        '(2017-07-04 10:25)*>\nChanges: <https://host/browse/SE-123|SE-123> ' +
         '555 (<@username>)',
     });
     expect(console.log.mock.calls.map(_ => _.join(''))).toEqual([
