@@ -245,6 +245,8 @@ exports.done = async (featureName, username) => {
   await git.addTag(tag);
   console.log(`Pushing tag ${tag}...`);
   await git.pushTags('origin');
+  console.log(`Pushing branch ${currentBranchName}...`);
+  await git.push(REMOTE_NAME, currentBranchName, { '-u': true });
   console.log(`Moving issue ${issueKey}...`);
   await jira.moveIssueToReadyToDeploy(issueKey);
   await jira.moveIssueToDeployed(issueKey);

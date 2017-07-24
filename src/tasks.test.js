@@ -401,6 +401,7 @@ describe('tasks.js', () => {
       'Running tests...',
       'Creating tag v1.2.3.feature.rc1...',
       'Pushing tag v1.2.3.feature.rc1...',
+      'Pushing branch SE-123/abc...',
       'Moving issue SE-123...',
       'Adding comment...',
       'Assign issue to username...',
