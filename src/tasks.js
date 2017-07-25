@@ -216,9 +216,9 @@ exports.commit = async fastCommitMessage => {
   console.log('Awesome!');
 };
 
-exports.done = async (featureName, username) => {
+exports.done = async (featureName, username, aliasIssueKey) => {
   const currentBranchName = await git.getCurrentBranchName();
-  const issueKey = currentBranchName.split('/')[0];
+  const issueKey = aliasIssueKey || currentBranchName.split('/')[0];
   if (currentBranchName === 'master') {
     console.log('You are not suppose to run this command on master');
     return;

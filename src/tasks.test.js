@@ -414,6 +414,74 @@ describe('tasks.js', () => {
     global.Date = originalDate;
   });
 
+  it('done with aliasIssueKey', async () => {
+    const log = console.log;
+    console.log = jest.fn();
+    const mockGit = require('./git.js');
+    const mockInput = require('./input.js');
+    const mockCmd = require('./cmd.js');
+    const mockJira = require('./jira.js');
+    const mockVersion = require('./version.js');
+    const mockSlack = require('./slack.js');
+    const originalDate = global.Date;
+    global.Date = jest
+      .fn()
+      .mockImplementation(() => new originalDate(1499138753854));
+    mockGit.getCurrentBranchName.mockImplementation(() => 'SE-123/abc');
+    mockGit.isRepoClean.mockImplementationOnce(() => true);
+    mockCmd.runTests.mockImplementation(() => true);
+    mockJira.moveIssueToReadyToDeploy.mockImplementation(() => true);
+    mockJira.moveIssueToDeployed.mockImplementation(() => true);
+    mockGit.getAllTags.mockImplementationOnce(() => []);
+    mockGit.addTag.mockImplementationOnce(() => true);
+    mockGit.pushTags.mockImplementationOnce(() => true);
+    mockVersion.getLatestVersion.mockImplementationOnce(() => 'v1.2.3');
+    mockJira.addComment.mockImplementation(() => true);
+    mockJira.assignIssue.mockImplementation(() => true);
+    mockSlack.sendNotification.mockImplementation(() => true);
+    const _func = tasks.updateUnreleasedNote;
+    tasks.updateUnreleasedNote = jest.fn();
+    await tasks.done('feature', 'username', 'SE-3333');
+    tasks.updateUnreleasedNote = _func;
+    expect(mockGit.getCurrentBranchName).toBeCalledWith();
+    expect(mockGit.isRepoClean).toBeCalledWith();
+    expect(mockCmd.runTests).toBeCalledWith();
+    expect(mockJira.moveIssueToReadyToDeploy).toBeCalledWith('SE-3333');
+    expect(mockJira.moveIssueToDeployed).toBeCalledWith('SE-3333');
+    expect(mockGit.getAllTags).toBeCalledWith();
+    expect(mockGit.addTag).toBeCalledWith('v1.2.3.feature.rc1');
+    expect(mockGit.checkout).toBeCalledWith('master');
+    expect(mockGit.pushTags).toBeCalledWith('origin');
+    expect(mockVersion.getLatestVersion).toBeCalledWith();
+    expect(mockJira.addComment).toBeCalledWith(
+      'SE-3333',
+      'Done at feature-v1.2.3.feature.rc1',
+    );
+    expect(mockJira.assignIssue).toBeCalledWith('SE-3333', 'username');
+    expect(mockSlack.sendNotification).toBeCalledWith({
+      text:
+        '<http://url|*Frontend Apps Feature Branch Released: ' +
+        '`feature-v1.2.3.feature.rc1` ' +
+        '(2017-07-04 10:25)*>\nChanges: <https://host/browse/SE-3333|SE-3333> ' +
+        '555 (<@username>)',
+    });
+    expect(console.log.mock.calls.map(_ => _.join(''))).toEqual([
+      'Running tests...',
+      'Creating tag v1.2.3.feature.rc1...',
+      'Pushing tag v1.2.3.feature.rc1...',
+      'Pushing branch SE-123/abc...',
+      'Moving issue SE-3333...',
+      'Adding comment...',
+      'Assign issue to username...',
+      'Notify to Slack...',
+      'Update Unreleased note...',
+      'Back to master...',
+      'Done',
+    ]);
+    console.log = log;
+    global.Date = originalDate;
+  });
+
   it('deploy happy case', async () => {
     const log = console.log;
     console.log = jest.fn();
