@@ -20,12 +20,12 @@ program
   });
 
 program
-  .command('new <issueTitle> <storyPoint> [type]')
+  .command('new <issueTitle> <storyPoint> [type] [linkIssueKey]')
   .description(
     [` - Create JIRA issue with title`, ` - Ask if want to start`].join('\n'),
   )
-  .action((issueTitle, storyPoint, type) => {
-    tasks.createIssue(issueTitle, storyPoint, type);
+  .action((issueTitle, storyPoint, type, linkIssueKey) => {
+    tasks.createIssue(issueTitle, storyPoint, type, linkIssueKey);
   });
 
 program

@@ -30,7 +30,7 @@ const JiraApi = (exports.JiraApi = function(
   // This is so we can fake during unit tests
   this.request = require('request');
   if (verbose !== true) {
-    logger = {log: function() {}};
+    logger = { log: function() {} };
   }
 
   // This is the same almost every time, refactored to make changing it
@@ -453,7 +453,7 @@ const JiraApi = (exports.JiraApi = function(
    * @param link
    * @param callback
    */
-  this.issueLink = function(link, callback) {
+  this.issueLink = function(link) {
     var options = {
       rejectUnauthorized: this.strictSSL,
       uri: this.makeUri('/issueLink'),
@@ -463,25 +463,57 @@ const JiraApi = (exports.JiraApi = function(
       body: link,
     };
 
-    this.doRequest(options, function(error, response) {
-      if (error) {
-        callback(error, null);
-        return;
-      }
+    return new Promise((resolve, reject) => {
+      this.doRequest(options, function(error, response) {
+        if (error) {
+          console.log(error, response);
+          reject(error, null);
+          return;
+        }
 
-      if (response.statusCode === 404) {
-        callback('Invalid project.');
-        return;
-      }
+        if (response.statusCode === 404) {
+          console.log(error, response);
+          reject('Invalid project.');
+          return;
+        }
 
-      if (response.statusCode !== 200) {
-        callback(
-          response.statusCode + ': Unable to connect to JIRA during issueLink.',
-        );
-        return;
-      }
+        if (response.statusCode !== 201) {
+          console.log(error, response);
+          reject(
+            response.statusCode +
+              ': Unable to connect to JIRA during issueLink.',
+          );
+          return;
+        }
 
-      callback(null);
+        resolve(null);
+      });
+    });
+  };
+
+  this.issueLinkTypes = function() {
+    var options = {
+      rejectUnauthorized: this.strictSSL,
+      uri: this.makeUri('/issueLinkType'),
+      method: 'GET',
+    };
+
+    return new Promise((resolve, reject) => {
+      this.doRequest(options, function(error, response, body) {
+        if (error) {
+          console.log(error, response);
+          reject(error, null);
+          return;
+        }
+
+        if (response.statusCode !== 200) {
+          console.log(error, response);
+          reject(response.statusCode + ': Error.');
+          return;
+        }
+
+        resolve(body);
+      });
     });
   };
 
@@ -681,7 +713,7 @@ const JiraApi = (exports.JiraApi = function(
     // backwards compatibility
     optional = optional || {};
     if (Array.isArray(optional)) {
-      optional = {fields: optional};
+      optional = { fields: optional };
     }
 
     var options = {
@@ -1276,7 +1308,7 @@ const JiraApi = (exports.JiraApi = function(
     var options = {
       rejectUnauthorized: this.strictSSL,
       uri: this.makeUri('/issue/' + issueId + '/assignee'),
-      body: {name: username},
+      body: { name: username },
       method: 'PUT',
       followAllRedirects: true,
       json: true,

@@ -65,7 +65,7 @@ exports.openIssue = issueKey => {
   opn(config.protocol + '://' + config.host + '/browse/' + issueKey);
 };
 
-exports.createIssue = async (issueTitle, storyPoint, type) => {
+exports.createIssue = async (issueTitle, storyPoint, type, linkIssueKey) => {
   console.log(`Get project information code "${PROJECT_CODE}"`);
   const project = await jiraApi.getProject(PROJECT_CODE);
 
@@ -115,6 +115,15 @@ exports.createIssue = async (issueTitle, storyPoint, type) => {
 
   console.log(`Creating issue (${issueType}) in ${activeSprint.name}...`);
   const issue = await jiraApi.addNewIssue(issueFields);
+
+  if (linkIssueKey) {
+    console.log(`Linking issue to ${linkIssueKey}...`);
+    await jiraApi.issueLink({
+      type: { name: 'Relates' },
+      inwardIssue: { key: issue.key },
+      outwardIssue: { key: linkIssueKey },
+    });
+  }
 
   console.log('Issue created: ', issue.key);
   return issue;

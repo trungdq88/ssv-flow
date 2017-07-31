@@ -25,11 +25,11 @@ require('./lib/jira-api.js').JiraApi.mockImplementation(() => ({
     }),
   listTransitions: issueKey =>
     Promise.resolve({
-      transitions: [{name: 'a'}, {name: 'b'}, {name: 'c'}],
+      transitions: [{ name: 'a' }, { name: 'b' }, { name: 'c' }],
     }),
   transitionIssue: (issueKey, transition) => true,
-  assignIssue: (issueKey, username) => Promise.resolve({name: 'assigned'}),
-  addComment: (issueKey, comment) => Promise.resolve({name: 'comment'}),
+  assignIssue: (issueKey, username) => Promise.resolve({ name: 'assigned' }),
+  addComment: (issueKey, comment) => Promise.resolve({ name: 'comment' }),
   getProject: projectCode => ({
     name: 'getProject',
   }),
@@ -45,6 +45,7 @@ require('./lib/jira-api.js').JiraApi.mockImplementation(() => ({
     issue,
     key: 'issue_key',
   }),
+  issueLink: issue => true,
 }));
 
 const jira = require('./jira.js');
@@ -77,11 +78,11 @@ describe('jira.js', () => {
     expect(issue).toEqual({
       issue: {
         fields: {
-          assignee: {name: 'me'},
-          components: [{id: 'hq-frontend'}],
-          issuetype: {id: 'task'},
-          priority: {id: 'medium'},
-          project: {id: '123123'},
+          assignee: { name: 'me' },
+          components: [{ id: 'hq-frontend' }],
+          issuetype: { id: 'task' },
+          priority: { id: 'medium' },
+          project: { id: '123123' },
           sprint: 'sprint_id',
           'story-point': 1,
           summary: 'title',
@@ -106,11 +107,11 @@ describe('jira.js', () => {
     expect(issue).toEqual({
       issue: {
         fields: {
-          assignee: {name: 'me'},
-          components: [{id: 'hq-frontend'}],
-          issuetype: {id: 'bug'},
-          priority: {id: 'medium'},
-          project: {id: '123123'},
+          assignee: { name: 'me' },
+          components: [{ id: 'hq-frontend' }],
+          issuetype: { id: 'bug' },
+          priority: { id: 'medium' },
+          project: { id: '123123' },
           sprint: 'sprint_id',
           'story-point': 1,
           summary: 'title',
