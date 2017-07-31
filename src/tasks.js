@@ -344,8 +344,6 @@ exports.deploy = async () => {
     )
   );
 
-  console.log('Updating release note...');
-
   const releaseNote = [
     `## Frontend Apps Release **${latestTag}** (${dateFormat(
       new Date(),
@@ -355,16 +353,27 @@ exports.deploy = async () => {
     .concat([userChangeLog])
     .join('\n');
 
-  const releaseNoteUrl = await confluence.appendToPage(
-    CONFLUENCE_RELEASE_NOTE_PAGE,
-    mdToHtml(releaseNote)
-  );
-
   console.log('Notify on Slack...');
 
   await slack.sendNotification({
-    text: mdToSlack(releaseNote, releaseNoteUrl)
+    text: mdToSlack(releaseNote, CONFLUENCE_RELEASE_NOTE_PAGE_URL)
   });
+
+  console.log('Updating release note...');
+
+  let releaseNoteUrl;
+  try {
+    releaseNoteUrl = await confluence.appendToPage(
+      CONFLUENCE_RELEASE_NOTE_PAGE,
+      mdToHtml(releaseNote)
+    );
+  } catch (e) {
+    console.error(e);
+    console.log(
+      'Error: could not update release note. Please update manually.'
+    );
+    console.log(releaseNote);
+  }
 
   console.log('Done.');
 };

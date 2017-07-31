@@ -612,7 +612,7 @@ describe('tasks.js', () => {
     );
     expect(mockSlack.sendNotification).toBeCalledWith({
       text: [
-        '<link here|*Frontend Apps Release `v1.2.3` (2017-07-04 10:25):*>',
+        '<http://url|*Frontend Apps Release `v1.2.3` (2017-07-04 10:25):*>',
         'Changes:',
         '',
         '*JIRA issues:*',
@@ -662,8 +662,8 @@ describe('tasks.js', () => {
       'Issue SE-2449... Done.',
       'Issue SE-2441... Done.',
       'Issue SE-2440... Done.',
-      'Updating release note...',
       'Notify on Slack...',
+      'Updating release note...',
       'Done.'
     ]);
     console.log = log;
