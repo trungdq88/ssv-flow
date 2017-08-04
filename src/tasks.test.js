@@ -758,7 +758,7 @@ describe('tasks.js', () => {
     expect(mockConfluence.editPage.mock.calls).toEqual([
       [
         'Release Note - Frontend Apps',
-        '<blockquote><h1>Unreleased</h1><p id="unreleased-note"><ul>\n' +
+        '<blockquote><h1>Unreleased (2017-07-04 10:25)</h1><p id="unreleased-note"><ul>\n' +
           '<li><a href="https://host/browse/SE-234">SE-234</a>' +
           ' SE-234 summary (@SE-234 creator)' +
           ' (<code>feature-issue-SE-234-rc1</code>)' +
@@ -813,7 +813,7 @@ describe('tasks.js', () => {
     expect(mockConfluence.editPage.mock.calls).toEqual([
       [
         'Release Note - Frontend Apps',
-        '<blockquote><h1>Unreleased</h1><p id="unreleased-note"><ul>\n' +
+        '<blockquote><h1>Unreleased (2017-07-04 10:25)</h1><p id="unreleased-note"><ul>\n' +
           '<li><a href="https://host/browse/SE-234">SE-234</a>' +
           ' SE-234 summary (@SE-234 creator)' +
           ' (<code>feature-issue-SE-234-rc1</code>)' +

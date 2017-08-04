@@ -427,7 +427,7 @@ exports.updateUnreleasedNote = async () => {
     const html = mdToHtml(pendingIssues);
     unreleasedNote =
       `<blockquote>` +
-      `<h1>Unreleased</h1>` +
+      `<h1>Unreleased (${dateFormat(new Date(), 'yyyy-mm-dd HH:MM')})</h1>` +
       `<p id="unreleased-note">` +
       html +
       `</p>` +
@@ -435,7 +435,7 @@ exports.updateUnreleasedNote = async () => {
   } else {
     unreleasedNote =
       `<blockquote>` +
-      `<h1>Unreleased</h1>` +
+      `<h1>Unreleased (${dateFormat(new Date(), 'yyyy-mm-dd HH:MM')})</h1>` +
       `<p id="unreleased-note">` +
       `No pending issue :-)` +
       `</p>` +
