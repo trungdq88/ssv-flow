@@ -32,7 +32,10 @@ const getFullIssueKey = issueKey =>
   '-' +
   issueKey.replace(new RegExp('^' + PROJECT_CODE + '-'), '');
 
-const generateSmartChangeLog = async logs => {
+const generateSmartChangeLog = async (
+  logs,
+  { duplicateJiraIssue = false } = {},
+) => {
   const changeLogText = await changeLog(
     logs,
     PROJECT_CODE,
@@ -42,6 +45,7 @@ const generateSmartChangeLog = async logs => {
     },
     {
       jiraIssueLink,
+      duplicateJiraIssue,
     },
   );
   const userChangeLog = await input.enter(changeLogText.join('\n'));
@@ -270,7 +274,9 @@ exports.done = async (featureName, username, aliasIssueKey) => {
     const changeLogSinceLastRc = await git.getLogSinceLastTag(
       currentBranchName,
     );
-    const userChangeLog = await generateSmartChangeLog(changeLogSinceLastRc);
+    const userChangeLog = await generateSmartChangeLog(changeLogSinceLastRc, {
+      duplicateJiraIssue: true,
+    });
     if (!userChangeLog) {
       console.log('Cancelled.');
       return;

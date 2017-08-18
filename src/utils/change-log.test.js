@@ -44,6 +44,40 @@ describe('change-log.js', () => {
     ]);
   });
 
+  it('jiraIssueDuplicate jiraIssueDuplicate true', () => {
+    expect(
+      changeLog(
+        [
+          '[HQ] [SE-2449] Optimize file read',
+          '[HQ] [SE-2449] Test screenshot',
+          '[HQ] [SE-2449] Read meta',
+        ],
+        'SE',
+        issueKey =>
+          Promise.resolve({
+            fields: {
+              summary: `issue key ${issueKey}`,
+              creator: { name: `name-${issueKey}` },
+            },
+          }),
+        {
+          jiraIssueLink: 'http://jira-link',
+          duplicateJiraIssue: true,
+        },
+      ),
+    ).resolves.toEqual([
+      `Changes:`,
+      ``,
+      `### JIRA issues:`,
+      `- [[SE-2449]](http://jira-link/SE-2449) issue key SE-2449 (@name-SE-2449)`,
+      ``,
+      `### Others:`,
+      '- [HQ] [SE-2449] Optimize file read',
+      '- [HQ] [SE-2449] Test screenshot',
+      '- [HQ] [SE-2449] Read meta',
+    ]);
+  });
+
   it('jiraIssueDuplicate', () => {
     expect(
       changeLog(
@@ -93,6 +127,34 @@ describe('change-log.js', () => {
       '- [LOG/CDC/SUP] [SE-2440] Bitbucket pipeline',
       '- [CONFIG] [master] Use Bitbucket pipeline',
       '- bitbucket-pipelines.yml created online with Bitbucket',
+    ]);
+  });
+
+  it('jiraIssueDuplicate with no other', () => {
+    expect(
+      changeLog(
+        ['[HQ] [SE-2449] Optimize file read'],
+        'SE',
+        issueKey =>
+          Promise.resolve({
+            fields: {
+              summary: `issue key ${issueKey}`,
+              creator: { name: `name-${issueKey}` },
+            },
+          }),
+        {
+          jiraIssueLink: 'http://jira-link',
+          duplicateJiraIssue: true,
+        },
+      ),
+    ).resolves.toEqual([
+      `Changes:`,
+      ``,
+      `### JIRA issues:`,
+      `- [[SE-2449]](http://jira-link/SE-2449) issue key SE-2449 (@name-SE-2449)`,
+      ``,
+      `### Others:`,
+      '- [HQ] [SE-2449] Optimize file read',
     ]);
   });
 
