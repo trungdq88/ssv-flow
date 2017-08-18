@@ -298,10 +298,7 @@ exports.done = async (featureName, username, aliasIssueKey) => {
   await jira.moveIssueToReadyToDeploy(issueKey);
   await jira.moveIssueToDeployed(issueKey);
   console.log(`Adding comment...`);
-  await jira.addComment(
-    issueKey,
-    `Done at feature-${tag}\n${mdToHtml(rcChangeLog)}`,
-  );
+  await jira.addComment(issueKey, `Done at feature-${tag}\n${rcChangeLog}`);
   console.log(`Assign issue to ${username}...`);
   await jira.assignIssue(issueKey, username);
   const issue = await jira.findIssue(issueKey);

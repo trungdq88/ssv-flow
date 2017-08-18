@@ -487,17 +487,15 @@ describe('tasks.js', () => {
       'SE-123',
       'Done at feature-v1.2.3.feature.rc2\n' +
         [
-          '<p>Changes:</p>',
-          '<h3 id="jiraissues">JIRA issues:</h3>',
-          '<ul>',
-          '<li><a href="https://host/browse/SE-2449">[SE-2449]</a> issue SE-2449 (@name-SE-2449)</li>',
-          '</ul>',
-          '<h3 id="others">Others:</h3>',
-          '<ul>',
-          '<li>[HQ] [SE-2449] Optimize file read</li>',
-          '<li>[HQ] [SE-2449] Test screenshot</li>',
-          '<li>[HQ] [SE-2449] Read meta</li>',
-          '</ul>',
+          'Changes:',
+          '',
+          '### JIRA issues:',
+          '- [[SE-2449]](https://host/browse/SE-2449) issue SE-2449 (@name-SE-2449)',
+          '',
+          '### Others:',
+          '- [HQ] [SE-2449] Optimize file read',
+          '- [HQ] [SE-2449] Test screenshot',
+          '- [HQ] [SE-2449] Read meta',
         ].join('\n'),
     );
     expect(mockJira.assignIssue).toBeCalledWith('SE-123', 'username');
