@@ -325,6 +325,26 @@ describe('git.js', () => {
     return expect(p).resolves.toEqual(['1', '2']);
   });
 
+  it('getLogSinceLastTag feature tag', () => {
+    const mockSimpleGit = require('simple-git').mockImplementation(() => ({
+      log: ([branch], callback) =>
+        callback(null, {
+          all: [
+            '[SE-3014] Update test case for rounding (HEAD -> SE-3014/logistic-portal-user-can-input-negative-number-in)',
+            '[SHARED] [SE-3014] Handle negavite due to calculation. Round.',
+            '[TEST] [SE-3014] Fix test case (tag: v2.4.49.fix_negative_final_suggestion.rc1, origin/SE-3014/logistic-portal-user-can-input-negative-number-in)',
+            '[TEST/SHARED/LOG] [SE-3014] [Logistic portal]User can input negative number into refill final suggestion',
+          ].map(msg => ({ message: msg })),
+        }),
+    }));
+    const p = git.getLogSinceLastTag('master');
+    expect(mockSimpleGit).toBeCalledWith('/DUMMY');
+    return expect(p).resolves.toEqual([
+      '[SE-3014] Update test case for rounding (HEAD -> SE-3014/logistic-portal-user-can-input-negative-number-in)',
+      '[SHARED] [SE-3014] Handle negavite due to calculation. Round.',
+    ]);
+  });
+
   it('getLogSinceLastTag case 2', () => {
     const mockSimpleGit = require('simple-git').mockImplementation(() => ({
       log: ([branch], callback) =>

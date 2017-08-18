@@ -15,14 +15,14 @@ const mdToHtml = require('./utils/md-to-html.js');
 const mdToSlack = require('./utils/md-to-slack.js');
 const {
   getLatestFeatureTagRcNumber,
-  parseBranchNameToJiraIssueKey
+  parseBranchNameToJiraIssueKey,
 } = require('./utils/utils.js');
 
 const {
   PROJECT_CODE,
   REMOTE_NAME,
   CONFLUENCE_RELEASE_NOTE_PAGE,
-  CONFLUENCE_RELEASE_NOTE_PAGE_URL
+  CONFLUENCE_RELEASE_NOTE_PAGE_URL,
 } = config;
 
 const jiraIssueLink = config.protocol + '://' + config.host + '/browse';
@@ -31,6 +31,22 @@ const getFullIssueKey = issueKey =>
   PROJECT_CODE +
   '-' +
   issueKey.replace(new RegExp('^' + PROJECT_CODE + '-'), '');
+
+const generateSmartChangeLog = async logs => {
+  const changeLogText = await changeLog(
+    logs,
+    PROJECT_CODE,
+    issueKey => {
+      console.log(`Fetching ${issueKey}...`);
+      return jira.findIssue(issueKey);
+    },
+    {
+      jiraIssueLink,
+    },
+  );
+  const userChangeLog = await input.enter(changeLogText.join('\n'));
+  return userChangeLog;
+};
 
 exports.generateReleaseNotes = async (issueKey, username) => {
   const tagRegExp = new RegExp('\\(tag: (v\\d+\\.\\d+\\.\\d+)\\)$');
@@ -48,7 +64,7 @@ exports.generateReleaseNotes = async (issueKey, username) => {
     }
   }
   const tags = Array.from(new Set(tagLogs.map(_ => _.tag))).map(tag =>
-    tagLogs.find(_ => _.tag === tag)
+    tagLogs.find(_ => _.tag === tag),
   );
 
   const getTagLogs = tag =>
@@ -63,18 +79,18 @@ exports.generateReleaseNotes = async (issueKey, username) => {
           return jira.findIssue(issueKey).catch(_ => ({
             fields: {
               summary: '(Issue not found)',
-              creator: { name: 'error' }
-            }
+              creator: { name: 'error' },
+            },
           }));
-        })
-      )
+        }),
+      ),
     )).map((notes, index) =>
       [
         ``,
         `## Release ${tags[index].tag} (${tags[index].date}):`,
-        notes.join('\n')
-      ].join('\n')
-    )
+        notes.join('\n'),
+      ].join('\n'),
+    ),
   ].join('\n');
   console.log(releaseNotes);
 };
@@ -133,7 +149,7 @@ exports.createIssue = async (issueTitle, storyPoint, type, linkIssueKey) => {
     issueTitle,
     storyPoint,
     type,
-    linkIssueKey && getFullIssueKey(linkIssueKey)
+    linkIssueKey && getFullIssueKey(linkIssueKey),
   );
 
   if (await input.ask(`Start issue ${issue.key} now?`)) {
@@ -204,9 +220,9 @@ exports.commit = async fastCommitMessage => {
     [
       { value: 'd', key: 'd', name: 'Show diff' },
       { value: 'a', key: 'a', name: 'Add all & write commit message' },
-      { value: 'c', key: 'c', name: 'Cancel' }
+      { value: 'c', key: 'c', name: 'Cancel' },
     ],
-    1
+    1,
   );
   switch (choice) {
     case 'd':
@@ -239,17 +255,32 @@ exports.done = async (featureName, username, aliasIssueKey) => {
     return;
   }
 
-  console.log('Running tests...');
-  await cmd.runTests();
-
   const latestVersion = await version.getLatestVersion();
   const tags = await git.getAllTags();
   const rcNumber = getLatestFeatureTagRcNumber(
     tags,
     featureName,
-    latestVersion
+    latestVersion,
   );
   const tag = `${latestVersion}.${featureName}.rc${rcNumber + 1}`;
+
+  let rcChangeLog = '';
+  if (rcNumber > 0) {
+    // Need change log
+    const changeLogSinceLastRc = await git.getLogSinceLastTag(
+      currentBranchName,
+    );
+    const userChangeLog = await generateSmartChangeLog(changeLogSinceLastRc);
+    if (!userChangeLog) {
+      console.log('Cancelled.');
+      return;
+    }
+    console.log(userChangeLog);
+    rcChangeLog = userChangeLog;
+  }
+
+  console.log('Running tests...');
+  await cmd.runTests();
 
   console.log(`Creating tag ${tag}...`);
   await git.addTag(tag);
@@ -261,7 +292,10 @@ exports.done = async (featureName, username, aliasIssueKey) => {
   await jira.moveIssueToReadyToDeploy(issueKey);
   await jira.moveIssueToDeployed(issueKey);
   console.log(`Adding comment...`);
-  await jira.addComment(issueKey, `Done at feature-${tag}`);
+  await jira.addComment(
+    issueKey,
+    `Done at feature-${tag}\n${mdToHtml(rcChangeLog)}`,
+  );
   console.log(`Assign issue to ${username}...`);
   await jira.assignIssue(issueKey, username);
   const issue = await jira.findIssue(issueKey);
@@ -271,11 +305,11 @@ exports.done = async (featureName, username, aliasIssueKey) => {
       `<${CONFLUENCE_RELEASE_NOTE_PAGE_URL}|` +
         `*Frontend Apps Feature Branch Released: \`feature-${tag}\` (${dateFormat(
           new Date(),
-          'yyyy-mm-dd HH:MM'
+          'yyyy-mm-dd HH:MM',
         )})*>`,
-      `Changes: <${jiraIssueLink}/${issueKey}|${issueKey}> ` +
-        `${issue.fields.summary} (<@${username}>)`
-    ].join('\n')
+      `Deployed: <${jiraIssueLink}/${issueKey}|${issueKey}> ` +
+        `${issue.fields.summary} (<@${username}>)\n${mdToSlack(rcChangeLog)}`,
+    ].join('\n'),
   });
 
   console.log('Back to master...');
@@ -305,18 +339,8 @@ exports.deploy = async () => {
 
   console.log('Fetching issues info from JIRA...');
   const logs = await git.getLogSinceLastTag('master');
-  const changeLogText = await changeLog(
-    logs,
-    PROJECT_CODE,
-    issueKey => {
-      console.log(`Fetching ${issueKey}...`);
-      return jira.findIssue(issueKey);
-    },
-    {
-      jiraIssueLink
-    }
-  );
-  const userChangeLog = await input.enter(changeLogText.join('\n'));
+
+  const userChangeLog = await generateSmartChangeLog(logs);
 
   if (!userChangeLog) {
     console.log('Cancelled');
@@ -334,7 +358,7 @@ exports.deploy = async () => {
   console.log(
     [`Pending issues: ${pendingIssues.length} issue(s)`]
       .concat(pendingIssues.map(_ => ` - ${_.issueKey} (${_.username})`))
-      .join('\n')
+      .join('\n'),
   );
 
   console.log(`Moving && assigning ${pendingIssues.length} issue(s)...`);
@@ -345,15 +369,15 @@ exports.deploy = async () => {
         await jira.addComment(issueKey, `Released at ${latestTag}.`);
         // await jira.assignIssue(issueKey, username);
         console.log(`Issue ${issueKey}... Done.`);
-      })()
-    )
+      })(),
+    ),
   );
 
   const releaseNote = [
     `## Frontend Apps Release **${latestTag}** (${dateFormat(
       new Date(),
-      'yyyy-mm-dd HH:MM'
-    )}):`
+      'yyyy-mm-dd HH:MM',
+    )}):`,
   ]
     .concat([userChangeLog])
     .join('\n');
@@ -361,7 +385,7 @@ exports.deploy = async () => {
   console.log('Notify on Slack...');
 
   await slack.sendNotification({
-    text: mdToSlack(releaseNote, CONFLUENCE_RELEASE_NOTE_PAGE_URL)
+    text: mdToSlack(releaseNote, CONFLUENCE_RELEASE_NOTE_PAGE_URL),
   });
 
   console.log('Updating release note...');
@@ -370,12 +394,12 @@ exports.deploy = async () => {
   try {
     releaseNoteUrl = await confluence.appendToPage(
       CONFLUENCE_RELEASE_NOTE_PAGE,
-      mdToHtml(releaseNote)
+      mdToHtml(releaseNote),
     );
   } catch (e) {
     console.error(e);
     console.log(
-      'Error: could not update release note. Please update manually.'
+      'Error: could not update release note. Please update manually.',
     );
     console.log(releaseNote);
   }
@@ -387,7 +411,7 @@ exports.getPendingIssues = async () => {
   const unmergedBranches = await git.getAllUnmergedBranches();
   const issueKeys = parseBranchNameToJiraIssueKey(
     unmergedBranches,
-    PROJECT_CODE
+    PROJECT_CODE,
   );
 
   if (issueKeys.length === 0) {
@@ -396,10 +420,10 @@ exports.getPendingIssues = async () => {
   }
 
   const issues = await Promise.all(
-    issueKeys.map(issueKey => jira.findIssue(issueKey))
+    issueKeys.map(issueKey => jira.findIssue(issueKey)),
   );
   const issueFeatureTags = await Promise.all(
-    issueKeys.map(issueKey => git.getIssueFeatureTag(issueKey))
+    issueKeys.map(issueKey => git.getIssueFeatureTag(issueKey)),
   );
 
   const output = issues
@@ -409,7 +433,7 @@ exports.getPendingIssues = async () => {
         ` ${issue.fields.summary}` +
         ` (@${issue.fields.creator.name})${issueFeatureTags[index]
           ? ` (\`feature-${issueFeatureTags[index]}\`)`
-          : ''}`
+          : ''}`,
     )
     .join('\n');
 
@@ -452,7 +476,7 @@ exports.updateUnreleasedNote = async () => {
   if (content.indexOf('<blockquote>') === 0) {
     newContent = content.replace(
       /<blockquote>[\s\S]*?<\/blockquote>/,
-      unreleasedNote
+      unreleasedNote,
     );
   } else {
     newContent = unreleasedNote + content;

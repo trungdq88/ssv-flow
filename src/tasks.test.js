@@ -40,7 +40,7 @@ describe('tasks.js', () => {
     mockJira.moveIssueToStartProgress.mockImplementation(() => true);
     mockJira.findIssue.mockImplementation(() => ({
       key: 'SE-123',
-      fields: { summary: 'abc' }
+      fields: { summary: 'abc' },
     }));
     mockGit.isRepoClean.mockImplementation(() => true);
     mockGit.checkout.mockImplementation(() => true);
@@ -56,7 +56,7 @@ describe('tasks.js', () => {
       'Issue: SE-123 / abc',
       'Branch SE-123/abc already exist, checking out.',
       'Move issue to Start Progress...',
-      'Done! Happy coding!'
+      'Done! Happy coding!',
     ]);
     console.log = log;
   });
@@ -71,7 +71,7 @@ describe('tasks.js', () => {
     mockSlug.mockImplementation(_ => _);
     mockJira.findIssue.mockImplementation(() => ({
       key: 'SE-123',
-      fields: { summary: 'abc' }
+      fields: { summary: 'abc' },
     }));
     mockGit.isRepoClean.mockImplementation(() => true);
     mockGit.createBranch.mockImplementation(() => true);
@@ -98,7 +98,7 @@ describe('tasks.js', () => {
       'Creating branch SE-123/abc',
       'Push branch SE-123/abc',
       'Move issue to Start Progress...',
-      'Done! Happy coding!'
+      'Done! Happy coding!',
     ]);
     console.log = log;
   });
@@ -109,14 +109,14 @@ describe('tasks.js', () => {
     const mockJira = require('./jira.js');
     const mockInput = require('./input.js');
     mockJira.createIssue.mockImplementation(() => ({
-      key: 'SE-123'
+      key: 'SE-123',
     }));
     mockInput.ask.mockImplementation(() => false);
     await tasks.createIssue('title', 3, 'bug');
     expect(mockJira.createIssue).toBeCalledWith('title', 3, 'bug', undefined);
     expect(mockInput.ask).toBeCalledWith('Start issue SE-123 now?');
     expect(console.log.mock.calls.map(_ => _.join(''))).toEqual([
-      'Creating issue title'
+      'Creating issue title',
     ]);
     console.log = log;
   });
@@ -127,14 +127,14 @@ describe('tasks.js', () => {
     const mockJira = require('./jira.js');
     const mockInput = require('./input.js');
     mockJira.createIssue.mockImplementation(() => ({
-      key: 'SE-123'
+      key: 'SE-123',
     }));
     mockInput.ask.mockImplementation(() => false);
     await tasks.createIssue('title', 3, 'bug', '1234');
     expect(mockJira.createIssue).toBeCalledWith('title', 3, 'bug', 'SE-1234');
     expect(mockInput.ask).toBeCalledWith('Start issue SE-123 now?');
     expect(console.log.mock.calls.map(_ => _.join(''))).toEqual([
-      'Creating issue title'
+      'Creating issue title',
     ]);
     console.log = log;
   });
@@ -147,7 +147,7 @@ describe('tasks.js', () => {
     const mockInput = require('./input.js');
     mockJira.createIssue.mockImplementation(() => ({
       key: 'SE-123',
-      summary: 'abc'
+      summary: 'abc',
     }));
     mockInput.ask.mockImplementation(() => true);
     mockJira.moveIssueToStartProgress.mockImplementation(() => true);
@@ -167,7 +167,7 @@ describe('tasks.js', () => {
       'Issue: SE-123 / abc',
       'Branch SE-123/abc already exist, checking out.',
       'Move issue to Start Progress...',
-      'Done! Happy coding!'
+      'Done! Happy coding!',
     ]);
     console.log = log;
   });
@@ -180,7 +180,7 @@ describe('tasks.js', () => {
     mockGit.isRepoClean.mockImplementation(() => true);
     await tasks.commit();
     expect(console.error.mock.calls.map(_ => _.join(''))).toEqual([
-      'Repo is clean, there is nothing to commit!'
+      'Repo is clean, there is nothing to commit!',
     ]);
     console.error = error;
   });
@@ -205,16 +205,16 @@ describe('tasks.js', () => {
     expect(mockGit.getCurrentBranchName).toBeCalledWith();
     expect(mockGit.getCommitTag).toBeCalledWith();
     expect(mockGit.commit).toBeCalledWith(
-      '[TAG] [SE-123] user enter commit msg'
+      '[TAG] [SE-123] user enter commit msg',
     );
     expect(mockInput.choice).toBeCalledWith(
       'Please select an action',
       [
         { key: 'd', name: 'Show diff', value: 'd' },
         { key: 'a', name: 'Add all & write commit message', value: 'a' },
-        { key: 'c', name: 'Cancel', value: 'c' }
+        { key: 'c', name: 'Cancel', value: 'c' },
       ],
-      1
+      1,
     );
     expect(mockInput.enter).toBeCalledWith();
     expect(console.log.mock.calls.map(_ => _.join(''))).toEqual([
@@ -222,7 +222,7 @@ describe('tasks.js', () => {
       'dirty text',
       '----- GIT STATUS END -----',
       'Committing:[TAG] [SE-123] user enter commit msg',
-      'Awesome!'
+      'Awesome!',
     ]);
     console.log = log;
   });
@@ -235,7 +235,7 @@ describe('tasks.js', () => {
     const mockJira = require('./jira.js');
     mockJira.findIssue.mockImplementation(() => ({
       key: '222',
-      fields: { summary: '555' }
+      fields: { summary: '555' },
     }));
     mockGit.isRepoClean.mockImplementation(() => false);
     mockGit.getStatusPrint.mockImplementation(() => 'dirty text');
@@ -257,9 +257,9 @@ describe('tasks.js', () => {
       [
         { key: 'd', name: 'Show diff', value: 'd' },
         { key: 'a', name: 'Add all & write commit message', value: 'a' },
-        { key: 'c', name: 'Cancel', value: 'c' }
+        { key: 'c', name: 'Cancel', value: 'c' },
       ],
-      1
+      1,
     );
     expect(mockInput.enter).toBeCalledWith();
     expect(console.log.mock.calls.map(_ => _.join(''))).toEqual([
@@ -268,7 +268,7 @@ describe('tasks.js', () => {
       '----- GIT STATUS END -----',
       'Fetching issue title as commit message...',
       'Committing:[TAG] [SE-123] 555',
-      'Awesome!'
+      'Awesome!',
     ]);
     console.log = log;
   });
@@ -290,7 +290,7 @@ describe('tasks.js', () => {
     expect(mockGit.getCommitTag).toBeCalledWith();
     expect(mockGit.commit).toBeCalledWith('[TAG] [SE-123] fast message');
     expect(console.log.mock.calls.map(_ => _.join(''))).toEqual([
-      'Committing:[TAG] [SE-123] fast message'
+      'Committing:[TAG] [SE-123] fast message',
     ]);
     console.log = log;
   });
@@ -302,7 +302,7 @@ describe('tasks.js', () => {
     const mockInput = require('./input.js');
     const mockChildProcess = require('child_process');
     mockChildProcess.spawn.mockImplementation(() => ({
-      on: (event, callback) => callback(0)
+      on: (event, callback) => callback(0),
     }));
     mockGit.isRepoClean.mockImplementation(() => false);
     mockGit.getStatusPrint.mockImplementation(() => 'dirty text');
@@ -317,22 +317,22 @@ describe('tasks.js', () => {
     expect(mockGit.getStatusPrint).toBeCalledWith();
     expect(mockGit.addAll).toBeCalledWith();
     expect(mockChildProcess.spawn).toBeCalledWith('git', ['diff', '--staged'], {
-      stdio: 'inherit'
+      stdio: 'inherit',
     });
     expect(mockInput.choice).toBeCalledWith(
       'Please select an action',
       [
         { key: 'd', name: 'Show diff', value: 'd' },
         { key: 'a', name: 'Add all & write commit message', value: 'a' },
-        { key: 'c', name: 'Cancel', value: 'c' }
+        { key: 'c', name: 'Cancel', value: 'c' },
       ],
-      1
+      1,
     );
     expect(console.log.mock.calls.map(_ => _.join(''))).toEqual([
       '----- GIT STATUS BEGIN -----',
       'dirty text',
       '----- GIT STATUS END -----',
-      'Awesome!'
+      'Awesome!',
     ]);
     console.log = log;
   });
@@ -345,7 +345,7 @@ describe('tasks.js', () => {
     mockGit.getCurrentBranchName.mockImplementation(() => 'master');
     await tasks.done('username');
     expect(console.log.mock.calls.map(_ => _.join(''))).toEqual([
-      'You are not suppose to run this command on master'
+      'You are not suppose to run this command on master',
     ]);
     console.log = log;
   });
@@ -359,7 +359,7 @@ describe('tasks.js', () => {
     mockGit.isRepoClean.mockImplementation(() => false);
     await tasks.done('username');
     expect(console.log.mock.calls.map(_ => _.join(''))).toEqual([
-      'Repo is not clean!'
+      'Repo is not clean!',
     ]);
     console.log = log;
   });
@@ -405,15 +405,15 @@ describe('tasks.js', () => {
     expect(mockVersion.getLatestVersion).toBeCalledWith();
     expect(mockJira.addComment).toBeCalledWith(
       'SE-123',
-      'Done at feature-v1.2.3.feature.rc1'
+      'Done at feature-v1.2.3.feature.rc1\n',
     );
     expect(mockJira.assignIssue).toBeCalledWith('SE-123', 'username');
     expect(mockSlack.sendNotification).toBeCalledWith({
       text:
         '<http://url|*Frontend Apps Feature Branch Released: ' +
         '`feature-v1.2.3.feature.rc1` ' +
-        '(2017-07-04 10:25)*>\nChanges: <https://host/browse/SE-123|SE-123> ' +
-        '555 (<@username>)'
+        '(2017-07-04 10:25)*>\nDeployed: <https://host/browse/SE-123|SE-123> ' +
+        '555 (<@username>)\n',
     });
     expect(console.log.mock.calls.map(_ => _.join(''))).toEqual([
       'Running tests...',
@@ -426,7 +426,101 @@ describe('tasks.js', () => {
       'Notify to Slack...',
       'Back to master...',
       'Update Unreleased note...',
-      'Done'
+      'Done',
+    ]);
+    console.log = log;
+    global.Date = originalDate;
+  });
+
+  it('done with rc > 2', async () => {
+    const log = console.log;
+    console.log = jest.fn();
+    const mockGit = require('./git.js');
+    const mockInput = require('./input.js');
+    const mockCmd = require('./cmd.js');
+    const mockJira = require('./jira.js');
+    const mockVersion = require('./version.js');
+    const mockSlack = require('./slack.js');
+    const originalDate = global.Date;
+    global.Date = jest
+      .fn()
+      .mockImplementation(() => new originalDate(1499138753854));
+    mockGit.getCurrentBranchName.mockImplementation(() => 'SE-123/abc');
+    mockGit.isRepoClean.mockImplementationOnce(() => true);
+    mockCmd.runTests.mockImplementation(() => true);
+    mockJira.moveIssueToReadyToDeploy.mockImplementation(() => true);
+    mockJira.moveIssueToDeployed.mockImplementation(() => true);
+    mockGit.getAllTags.mockImplementationOnce(() => ['v1.2.3.feature.rc1']);
+    mockGit.addTag.mockImplementationOnce(() => true);
+    mockGit.pushTags.mockImplementationOnce(() => true);
+    mockVersion.getLatestVersion.mockImplementationOnce(() => 'v1.2.3');
+    mockJira.addComment.mockImplementation(() => true);
+    mockJira.assignIssue.mockImplementation(() => true);
+    mockSlack.sendNotification.mockImplementation(() => true);
+    mockGit.getLogSinceLastTag.mockImplementation(() => [
+      '[HQ] [SE-2449] Optimize file read',
+      '[HQ] [SE-2449] Test screenshot',
+      '[HQ] [SE-2449] Read meta',
+    ]);
+    mockJira.findIssue.mockImplementation(issueKey => ({
+      fields: {
+        summary: 'issue ' + issueKey,
+        creator: { name: 'name-' + issueKey },
+      },
+    }));
+    mockInput.enter.mockImplementation(text => text);
+    const _func = tasks.updateUnreleasedNote;
+    tasks.updateUnreleasedNote = jest.fn();
+    await tasks.done('feature', 'username');
+    tasks.updateUnreleasedNote = _func;
+    expect(mockGit.getCurrentBranchName).toBeCalledWith();
+    expect(mockGit.isRepoClean).toBeCalledWith();
+    expect(mockCmd.runTests).toBeCalledWith();
+    expect(mockJira.moveIssueToReadyToDeploy).toBeCalledWith('SE-123');
+    expect(mockJira.moveIssueToDeployed).toBeCalledWith('SE-123');
+    expect(mockGit.getAllTags).toBeCalledWith();
+    expect(mockGit.addTag).toBeCalledWith('v1.2.3.feature.rc2');
+    expect(mockGit.checkout).toBeCalledWith('master');
+    expect(mockGit.pushTags).toBeCalledWith('origin');
+    expect(mockVersion.getLatestVersion).toBeCalledWith();
+    expect(mockJira.addComment).toBeCalledWith(
+      'SE-123',
+      'Done at feature-v1.2.3.feature.rc2\n' +
+        [
+          '<p>Changes:</p>',
+          '<ul>',
+          '<li><a href="https://host/browse/SE-2449">[SE-2449]</a> issue SE-2449 (@name-SE-2449)</li>',
+          '</ul>',
+        ].join('\n'),
+    );
+    expect(mockJira.assignIssue).toBeCalledWith('SE-123', 'username');
+    expect(mockSlack.sendNotification).toBeCalledWith({
+      text:
+        '<http://url|*Frontend Apps Feature Branch Released: ' +
+        '`feature-v1.2.3.feature.rc2` ' +
+        '(2017-07-04 10:25)*>\nDeployed: <https://host/browse/SE-123|SE-123> ' +
+        'issue SE-123 (<@username>)\n' +
+        'Changes:\n\n' +
+        '- <https://host/browse/SE-2449|SE-2449> issue SE-2449 (<@name-SE-2449>)',
+    });
+    expect(console.log.mock.calls.map(_ => _.join(''))).toEqual([
+      'Fetching SE-2449...',
+      [
+        'Changes:',
+        '',
+        '- [[SE-2449]](https://host/browse/SE-2449) issue SE-2449 (@name-SE-2449)',
+      ].join('\n'),
+      'Running tests...',
+      'Creating tag v1.2.3.feature.rc2...',
+      'Pushing tag v1.2.3.feature.rc2...',
+      'Pushing branch SE-123/abc...',
+      'Moving issue SE-123...',
+      'Adding comment...',
+      'Assign issue to username...',
+      'Notify to Slack...',
+      'Back to master...',
+      'Update Unreleased note...',
+      'Done',
     ]);
     console.log = log;
     global.Date = originalDate;
@@ -473,15 +567,15 @@ describe('tasks.js', () => {
     expect(mockVersion.getLatestVersion).toBeCalledWith();
     expect(mockJira.addComment).toBeCalledWith(
       'SE-3333',
-      'Done at feature-v1.2.3.feature.rc1'
+      'Done at feature-v1.2.3.feature.rc1\n',
     );
     expect(mockJira.assignIssue).toBeCalledWith('SE-3333', 'username');
     expect(mockSlack.sendNotification).toBeCalledWith({
       text:
         '<http://url|*Frontend Apps Feature Branch Released: ' +
         '`feature-v1.2.3.feature.rc1` ' +
-        '(2017-07-04 10:25)*>\nChanges: <https://host/browse/SE-3333|SE-3333> ' +
-        '555 (<@username>)'
+        '(2017-07-04 10:25)*>\nDeployed: <https://host/browse/SE-3333|SE-3333> ' +
+        'issue SE-3333 (<@username>)\n',
     });
     expect(console.log.mock.calls.map(_ => _.join(''))).toEqual([
       'Running tests...',
@@ -494,7 +588,7 @@ describe('tasks.js', () => {
       'Notify to Slack...',
       'Back to master...',
       'Update Unreleased note...',
-      'Done'
+      'Done',
     ]);
     console.log = log;
     global.Date = originalDate;
@@ -527,13 +621,13 @@ describe('tasks.js', () => {
       '[LOG/CDC] [SE-2440] Set timezone',
       '[LOG/CDC/SUP] [SE-2440] Bitbucket pipeline',
       '[CONFIG] [master] Use Bitbucket pipeline',
-      'bitbucket-pipelines.yml created online with Bitbucket'
+      'bitbucket-pipelines.yml created online with Bitbucket',
     ]);
     mockJira.findIssue.mockImplementation(issueKey => ({
       fields: {
         summary: 'issue ' + issueKey,
-        creator: { name: 'name-' + issueKey }
-      }
+        creator: { name: 'name-' + issueKey },
+      },
     }));
     mockInput.enter.mockImplementation(text => text + 'enter');
     mockCmd.deploy.mockImplementation(() => true);
@@ -549,7 +643,7 @@ describe('tasks.js', () => {
     expect(mockJira.findIssue.mock.calls).toEqual([
       ['SE-2449'],
       ['SE-2441'],
-      ['SE-2440']
+      ['SE-2440'],
     ]);
     expect(mockInput.enter).toBeCalledWith(
       [
@@ -566,8 +660,8 @@ describe('tasks.js', () => {
         `### Others:`,
         `- Add test-screenshot`,
         `- [CONFIG] [master] Use Bitbucket pipeline`,
-        `- bitbucket-pipelines.yml created online with Bitbucket`
-      ].join('\n')
+        `- bitbucket-pipelines.yml created online with Bitbucket`,
+      ].join('\n'),
     );
     expect(mockCmd.deploy).toBeCalledWith();
     expect(mockGit.getLatestTag).toBeCalledWith();
@@ -579,7 +673,7 @@ describe('tasks.js', () => {
     expect(mockJira.addComment.mock.calls).toEqual([
       ['SE-2449', 'Released at v1.2.3.'],
       ['SE-2441', 'Released at v1.2.3.'],
-      ['SE-2440', 'Released at v1.2.3.']
+      ['SE-2440', 'Released at v1.2.3.'],
     ]);
     // expect(mockJira.assignIssue.mock.calls).toEqual([
     //   ['SE-2449', 'name-SE-2449'],
@@ -607,8 +701,8 @@ describe('tasks.js', () => {
         `<li>Add test-screenshot</li>`,
         `<li>[CONFIG] [master] Use Bitbucket pipeline</li>`,
         `<li>bitbucket-pipelines.yml created online with Bitbucketenter</li>`,
-        `</ul>`
-      ].join('\n')
+        `</ul>`,
+      ].join('\n'),
     );
     expect(mockSlack.sendNotification).toBeCalledWith({
       text: [
@@ -626,8 +720,8 @@ describe('tasks.js', () => {
         '*Others:*',
         '- Add test-screenshot',
         '- [CONFIG] [master] Use Bitbucket pipeline',
-        '- bitbucket-pipelines.yml created online with Bitbucketenter'
-      ].join('\n')
+        '- bitbucket-pipelines.yml created online with Bitbucketenter',
+      ].join('\n'),
     });
     expect(global.Date).toBeCalledWith();
     expect(console.log.mock.calls.map(_ => _.join(''))).toEqual([
@@ -649,14 +743,14 @@ describe('tasks.js', () => {
         `### Others:`,
         `- Add test-screenshot`,
         `- [CONFIG] [master] Use Bitbucket pipeline`,
-        `- bitbucket-pipelines.yml created online with Bitbucketenter`
+        `- bitbucket-pipelines.yml created online with Bitbucketenter`,
       ].join('\n'),
       'Creating new tag & trigger deploy...',
       [
         'Pending issues: 3 issue(s)',
         ' - SE-2449 (name-SE-2449)',
         ' - SE-2441 (name-SE-2441)',
-        ' - SE-2440 (name-SE-2440)'
+        ' - SE-2440 (name-SE-2440)',
       ].join('\n'),
       'Moving && assigning 3 issue(s)...',
       'Issue SE-2449... Done.',
@@ -664,7 +758,7 @@ describe('tasks.js', () => {
       'Issue SE-2440... Done.',
       'Notify on Slack...',
       'Updating release note...',
-      'Done.'
+      'Done.',
     ]);
     console.log = log;
     global.Date = originalDate;
@@ -678,7 +772,7 @@ describe('tasks.js', () => {
     mockGit.getCurrentBranchName.mockImplementation(() => 'abc');
     await tasks.deploy();
     expect(console.log.mock.calls.map(_ => _.join(''))).toEqual([
-      'You can only to run this command on master'
+      'You can only to run this command on master',
     ]);
     console.log = log;
   });
@@ -693,17 +787,17 @@ describe('tasks.js', () => {
       key: issueKey,
       fields: {
         summary: issueKey + ' summary',
-        creator: { name: issueKey + ' creator' }
-      }
+        creator: { name: issueKey + ' creator' },
+      },
     }));
     mockGit.getAllUnmergedBranches.mockImplementation(() => [
       'SE-1234/aoehulrcaoheu',
       'SE-222/98457894597843',
       'aoeu',
-      '123'
+      '123',
     ]);
     mockGit.getIssueFeatureTag.mockImplementation(
-      issueKey => `issue-${issueKey}-rc1`
+      issueKey => `issue-${issueKey}-rc1`,
     );
     await tasks.getPendingIssues();
 
@@ -715,7 +809,7 @@ describe('tasks.js', () => {
         'SE-1234 summary (@SE-1234 creator) (`feature-issue-SE-1234-rc1`)\n' +
         '- [SE-222](https://host/browse/SE-222) ' +
         'SE-222 summary (@SE-222 creator) (`feature-issue-SE-222-rc1`)',
-      '==================='
+      '===================',
     ]);
     console.log = log;
   });
@@ -734,26 +828,26 @@ describe('tasks.js', () => {
       key: issueKey,
       fields: {
         summary: issueKey + ' summary',
-        creator: { name: issueKey + ' creator' }
-      }
+        creator: { name: issueKey + ' creator' },
+      },
     }));
     mockGit.getAllUnmergedBranches.mockImplementation(() => [
       'SE-234/aoehulrcaoheu',
       'SE-222/98457894597843',
       'aoeu',
-      '123'
+      '123',
     ]);
     mockConfluence.editPage.mockImplementation(() => true);
     mockConfluence.getPage.mockImplementation(() => ({
       body: {
         storage: {
-          value: '123'
-        }
-      }
+          value: '123',
+        },
+      },
     }));
     await tasks.updateUnreleasedNote();
     expect(mockConfluence.getPage).toBeCalledWith(
-      'Release Note - Frontend Apps'
+      'Release Note - Frontend Apps',
     );
     expect(mockConfluence.editPage.mock.calls).toEqual([
       [
@@ -767,8 +861,8 @@ describe('tasks.js', () => {
           ' SE-222 summary (@SE-222 creator)' +
           ' (<code>feature-issue-SE-222-rc1</code>)' +
           '</li>\n' +
-          '</ul></p></blockquote>123'
-      ]
+          '</ul></p></blockquote>123',
+      ],
     ]);
     console.log = log;
     global.Date = originalDate;
@@ -788,27 +882,29 @@ describe('tasks.js', () => {
       key: issueKey,
       fields: {
         summary: issueKey + ' summary',
-        creator: { name: issueKey + ' creator' }
-      }
+        creator: { name: issueKey + ' creator' },
+      },
     }));
     mockGit.getAllUnmergedBranches.mockImplementation(() => [
       'SE-234/aoehulrcaoheu',
       'SE-222/98457894597843',
       'aoeu',
-      '123'
+      '123',
     ]);
     mockConfluence.getPage.mockImplementation(() => ({
       body: {
         storage: {
           value:
-            '<blockquote><ul>\n' + '<li>existing</li>' + '</ul></blockquote>123'
-        }
-      }
+            '<blockquote><ul>\n' +
+            '<li>existing</li>' +
+            '</ul></blockquote>123',
+        },
+      },
     }));
     mockConfluence.editPage.mockImplementation(() => true);
     await tasks.updateUnreleasedNote();
     expect(mockConfluence.getPage).toBeCalledWith(
-      'Release Note - Frontend Apps'
+      'Release Note - Frontend Apps',
     );
     expect(mockConfluence.editPage.mock.calls).toEqual([
       [
@@ -822,8 +918,8 @@ describe('tasks.js', () => {
           ' SE-222 summary (@SE-222 creator)' +
           ' (<code>feature-issue-SE-222-rc1</code>)' +
           '</li>\n' +
-          '</ul></p></blockquote>123'
-      ]
+          '</ul></p></blockquote>123',
+      ],
     ]);
     console.log = log;
     global.Date = originalDate;
