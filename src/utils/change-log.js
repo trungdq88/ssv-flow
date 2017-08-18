@@ -3,7 +3,11 @@ module.exports = async (
   logs,
   jiraTaskPrefix,
   getJiraIssueInfo,
-  { jiraIssueOnly = false, jiraIssueLink = null } = {},
+  {
+    jiraIssueOnly = false,
+    jiraIssueLink = null,
+    duplicateJiraIssue = false,
+  } = {},
 ) => {
   const jiraRegExp = new RegExp(
     `[\\[\\s'](` + jiraTaskPrefix + `-\\d+)[\\]\\s\/]`,
@@ -22,7 +26,14 @@ module.exports = async (
     title: issueInfo.fields.summary,
     creator: issueInfo.fields.creator.name,
   }));
-  const others = jiraIssueOnly ? [] : logs.filter(log => !jiraRegExp.test(log));
+  let others = [];
+  if (jiraIssueOnly) {
+    others = [];
+  } else if (duplicateJiraIssue) {
+    others = logs;
+  } else {
+    others = logs.filter(log => !jiraRegExp.test(log));
+  }
 
   let sectionCount = 0;
   if (jiraIssues.length) sectionCount++;
