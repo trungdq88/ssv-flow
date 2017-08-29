@@ -306,10 +306,11 @@ exports.done = async (featureName, username, aliasIssueKey) => {
   await slack.sendNotification({
     text: [
       `<${CONFLUENCE_RELEASE_NOTE_PAGE_URL}|` +
-        `*Frontend Apps Feature Branch Released: \`feature-${tag}\` (${dateFormat(
+        `*Frontend Apps Feature Branch Released. (${dateFormat(
           new Date(),
           'yyyy-mm-dd HH:MM',
         )})*>`,
+      `\`feature-${tag}\``,
       `Deployed: <${jiraIssueLink}/${issueKey}|${issueKey}> ` +
         `${issue.fields.summary} (<@${username}>)\n${mdToSlack(rcChangeLog)}`,
     ].join('\n'),

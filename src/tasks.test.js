@@ -410,9 +410,10 @@ describe('tasks.js', () => {
     expect(mockJira.assignIssue).toBeCalledWith('SE-123', 'username');
     expect(mockSlack.sendNotification).toBeCalledWith({
       text:
-        '<http://url|*Frontend Apps Feature Branch Released: ' +
-        '`feature-v1.2.3.feature.rc1` ' +
-        '(2017-07-04 10:25)*>\nDeployed: <https://host/browse/SE-123|SE-123> ' +
+        '<http://url|*Frontend Apps Feature Branch Released. ' +
+        '(2017-07-04 10:25)*>\n' +
+        '`feature-v1.2.3.feature.rc1`\n' +
+        'Deployed: <https://host/browse/SE-123|SE-123> ' +
         '555 (<@username>)\n',
     });
     expect(console.log.mock.calls.map(_ => _.join(''))).toEqual([
@@ -501,9 +502,10 @@ describe('tasks.js', () => {
     expect(mockJira.assignIssue).toBeCalledWith('SE-123', 'username');
     expect(mockSlack.sendNotification).toBeCalledWith({
       text:
-        '<http://url|*Frontend Apps Feature Branch Released: ' +
-        '`feature-v1.2.3.feature.rc2` ' +
-        '(2017-07-04 10:25)*>\nDeployed: <https://host/browse/SE-123|SE-123> ' +
+        '<http://url|*Frontend Apps Feature Branch Released. ' +
+        '(2017-07-04 10:25)*>\n' +
+        '`feature-v1.2.3.feature.rc2`\n' +
+        'Deployed: <https://host/browse/SE-123|SE-123> ' +
         'issue SE-123 (<@username>)\n' +
         'Changes:\n\n' +
         '*JIRA issues:*\n' +
@@ -588,9 +590,10 @@ describe('tasks.js', () => {
     expect(mockJira.assignIssue).toBeCalledWith('SE-3333', 'username');
     expect(mockSlack.sendNotification).toBeCalledWith({
       text:
-        '<http://url|*Frontend Apps Feature Branch Released: ' +
-        '`feature-v1.2.3.feature.rc1` ' +
-        '(2017-07-04 10:25)*>\nDeployed: <https://host/browse/SE-3333|SE-3333> ' +
+        '<http://url|*Frontend Apps Feature Branch Released. ' +
+        '(2017-07-04 10:25)*>\n' +
+        '`feature-v1.2.3.feature.rc1`\n' +
+        'Deployed: <https://host/browse/SE-3333|SE-3333> ' +
         'issue SE-3333 (<@username>)\n',
     });
     expect(console.log.mock.calls.map(_ => _.join(''))).toEqual([
