@@ -273,7 +273,7 @@ exports.getIssueFeatureTag = issueKey => {
         .filter(msg => msg.indexOf(`tag: v`) > -1);
       if (msgs.length) {
         const matches = /tag: (v\d+\.\d+\.\d+\..*?\.rc\d+?),/.exec(msgs[0]);
-        const tag = matches[1];
+        const tag = matches ? matches[1] : '';
         resolve(tag);
       } else {
         resolve('');

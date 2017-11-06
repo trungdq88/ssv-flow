@@ -295,12 +295,16 @@ exports.done = async (featureName, username, aliasIssueKey) => {
   console.log(`Pushing branch ${currentBranchName}...`);
   await git.push(REMOTE_NAME, currentBranchName, { '-u': true });
   console.log(`Moving issue ${issueKey}...`);
-  await jira.moveIssueToReadyToDeploy(issueKey);
-  await jira.moveIssueToDeployed(issueKey);
-  console.log(`Adding comment...`);
-  await jira.addComment(issueKey, `Done at feature-${tag}\n${rcChangeLog}`);
-  console.log(`Assign issue to ${username}...`);
-  await jira.assignIssue(issueKey, username);
+  try {
+    await jira.moveIssueToReadyToDeploy(issueKey);
+    await jira.moveIssueToDeployed(issueKey);
+    console.log(`Adding comment...`);
+    await jira.addComment(issueKey, `Done at feature-${tag}\n${rcChangeLog}`);
+    console.log(`Assign issue to ${username}...`);
+    await jira.assignIssue(issueKey, username);
+  } catch (e) {
+    console.log(e);
+  }
   const issue = await jira.findIssue(issueKey);
   console.log(`Notify to Slack...`);
   await slack.sendNotification({

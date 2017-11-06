@@ -1206,7 +1206,8 @@ const JiraApi = (exports.JiraApi = function(
           resolve(true);
           return;
         }
-        const errorMsg = response.body.errorMessages.join('\n');
+        const errorMsg =
+          response.body.errorMessages && response.body.errorMessages.join('\n');
         reject(response.statusCode + ': ' + errorMsg);
       });
     });
